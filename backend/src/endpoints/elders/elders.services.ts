@@ -1,8 +1,8 @@
 import { and, eq } from "drizzle-orm";
 import type { z } from "zod";
 import { AppError } from "@mednours/backon";
-import { db } from "#config/db";
-import { careCircleMembers, elders } from "#config/schema";
+import { db } from "../../config/db";
+import { careCircleMembers, elders } from "../../config/schema";
 import type { createBodySchema, joinBodySchema } from "./elders.controller";
 
 const INVITE_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";

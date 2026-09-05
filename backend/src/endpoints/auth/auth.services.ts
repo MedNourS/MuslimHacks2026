@@ -2,8 +2,8 @@ import type { z } from "zod";
 import { eq } from "drizzle-orm";
 import { sign } from "hono/jwt";
 import { AppError } from "@mednours/backon";
-import { db } from "#config/db";
-import { users } from "#config/schema";
+import { db } from "../../config/db";
+import { users } from "../../config/schema";
 import type { signupBodySchema, loginBodySchema } from "./auth.controller";
 
 const password = (globalThis as unknown as {
