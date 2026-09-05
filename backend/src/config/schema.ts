@@ -50,3 +50,16 @@ export const timelinePosts = pgTable("timeline_posts", {
   body: text("body").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const visits = pgTable("visits", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  elderId: uuid("elder_id")
+    .notNull()
+    .references(() => elders.id, { onDelete: "cascade" }),
+  visitorId: integer("visitor_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  scheduledAt: timestamp("scheduled_at").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});

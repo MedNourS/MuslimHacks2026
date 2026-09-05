@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "hono",
-  "bunVersion": "1.x"
+  "bunVersion": "1.x",
+  "crons": [{ "path": "/cron/visit-digest", "schedule": "0 13 * * *" }]
 }

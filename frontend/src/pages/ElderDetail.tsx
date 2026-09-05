@@ -5,6 +5,7 @@ import type { CircleDetail } from "../lib/circles";
 import { getSessionUser } from "../lib/session";
 import { Button } from "../components/shared/Button";
 import { TimelineFeed } from "../components/timeline/TimelineFeed";
+import { VisitsPanel } from "../components/visits/VisitsPanel";
 
 const ROLE_LABEL: Record<CircleDetail["role"], string> = {
   family: "Family",
@@ -31,7 +32,7 @@ export default function ElderDetail() {
     if (!id) return;
 
     eldersApi
-      .getById<CircleDetail>({ id })
+      .getById<CircleDetail>(id)
       .then(setCircle)
       .catch((err) => setError(err instanceof Error ? err.message : "Couldn't load this circle."));
   }, [id, user, navigate]);
@@ -140,6 +141,7 @@ export default function ElderDetail() {
               </ul>
             </div>
 
+            <VisitsPanel elderId={circle.id} />
             <TimelineFeed elderId={circle.id} />
           </>
         )}

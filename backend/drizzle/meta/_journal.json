@@ -29,6 +29,13 @@
       "when": 1788649541390,
       "tag": "0003_clever_infant_terrible",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788650555257,
+      "tag": "0004_clumsy_wrecker",
+      "breakpoints": true
     }
   ]
 }

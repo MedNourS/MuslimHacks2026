@@ -11,6 +11,7 @@ import type { createBodySchema, updateBodySchema } from "../../../backend/src/en
 import type { signupBodySchema, loginBodySchema } from "../../../backend/src/endpoints/auth/auth.controller";
 import type { createBodySchema as eldersCreateBodySchema, joinBodySchema } from "../../../backend/src/endpoints/elders/elders.controller";
 import type { createBodySchema as timelineCreateBodySchema } from "../../../backend/src/endpoints/timeline/timeline.controller";
+import type { createBodySchema as visitsCreateBodySchema } from "../../../backend/src/endpoints/visits/visits.controller";
 
 const BASE_URL = resolveApiBaseUrl() || (import.meta.env.DEV ? "/api" : "");
 
@@ -18,11 +19,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getToken();
   const res = await fetch(BASE_URL + path, {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: "Bearer " + token } : {}),
-      ...(init && init.headers ? init.headers : {}),
-    },
+    headers: { "Content-Type": "application/json", ...(token ? { Authorization: "Bearer " + token } : {}), ...(init && init.headers ? init.headers : {}) },
   });
   if (!res.ok) {
     const errBody: any = await res.json().catch(() => undefined);
@@ -48,10 +45,19 @@ export const eldersApi = {
   create: <T = unknown>(body: z.infer<typeof eldersCreateBodySchema>) => request<T>("/elders", { method: "POST", body: JSON.stringify(body) }),
   join: <T = unknown>(body: z.infer<typeof joinBodySchema>) => request<T>("/elders/join", { method: "POST", body: JSON.stringify(body) }),
   list: <T = unknown>() => request<T>("/elders"),
-  getById: <T = unknown>(params: { id: string }) => request<T>("/elders/" + params.id),
+  getById: <T = unknown>(id: string) => request<T>("/elders/" + id),
 };
 
 export const timelineApi = {
   create: <T = unknown>(elderId: string, body: z.infer<typeof timelineCreateBodySchema>) => request<T>("/timeline/" + elderId, { method: "POST", body: JSON.stringify(body) }),
   list: <T = unknown>(elderId: string) => request<T>("/timeline/" + elderId),
+};
+
+export const visitsApi = {
+  create: <T = unknown>(elderId: string, body: z.infer<typeof visitsCreateBodySchema>) => request<T>("/visits/" + elderId, { method: "POST", body: JSON.stringify(body) }),
+  list: <T = unknown>(elderId: string) => request<T>("/visits/" + elderId),
+};
+
+export const cronApi = {
+  visitDigest: <T = unknown>() => request<T>("/cron/visit-digest"),
 };

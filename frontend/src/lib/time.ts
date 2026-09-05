@@ -13,3 +13,17 @@ export function formatRelativeTime(iso: string): string {
 
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: diffDay > 365 ? "numeric" : undefined });
 }
+
+export function formatVisitTime(iso: string): string {
+  const date = new Date(iso);
+  const now = new Date();
+  const isSameDay = date.toDateString() === now.toDateString();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(now.getDate() + 1);
+  const isTomorrow = date.toDateString() === tomorrow.toDateString();
+
+  const time = date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  if (isSameDay) return "Today, " + time;
+  if (isTomorrow) return "Tomorrow, " + time;
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + ", " + time;
+}
