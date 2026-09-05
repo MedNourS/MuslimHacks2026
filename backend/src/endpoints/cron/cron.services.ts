@@ -3,9 +3,33 @@ import { db } from "../../config/db";
 import { visits, elders, careCircleMembers, users } from "../../config/schema";
 import { sendEmail } from "../../config/email";
 
+// The app's users are Eastern-time (Montreal); the cron itself runs on Vercel's UTC clock,
+// so "today" has to be computed in the household's zone or evening visits (after ~8pm ET)
+// land in tomorrow's UTC date and get reported a day late — after they already happened.
+const DIGEST_TIME_ZONE = "America/Toronto";
+
+function startOfDayInZone(date: Date, timeZone: string): Date {
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+  const parts = Object.fromEntries(fmt.formatToParts(date).map((p) => [p.type, p.value]));
+  const hour = parts.hour === "24" ? 0 : Number(parts.hour);
+  const asUtcGuess = Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day), hour, Number(parts.minute), Number(parts.second));
+  const offsetMs = asUtcGuess - date.getTime();
+  const localMidnightUtcGuess = Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day), 0, 0, 0) - offsetMs;
+  return new Date(localMidnightUtcGuess);
+}
+
 export async function runVisitDigest() {
   const now = new Date();
-  const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const startOfDay = startOfDayInZone(now, DIGEST_TIME_ZONE);
   const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
 
   const todaysVisits = await db
@@ -46,9 +70,9 @@ export async function runVisitDigest() {
         const time = v.scheduledAt.toLocaleTimeString("en-US", {
           hour: "numeric",
           minute: "2-digit",
-          timeZone: "UTC",
+          timeZone: DIGEST_TIME_ZONE,
         });
-        return `<li><strong>${v.visitorName}</strong> around ${time} UTC${v.notes ? ` — ${v.notes}` : ""}</li>`;
+        return `<li><strong>${v.visitorName}</strong> around ${time}${v.notes ? ` — ${v.notes}` : ""}</li>`;
       })
       .join("");
 
