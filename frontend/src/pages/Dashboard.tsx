@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { eldersApi } from "../lib/api";
+import { authApi, eldersApi } from "../lib/api";
 import type { Circle } from "../lib/circles";
 import { clearSession, getSessionUser } from "../lib/session";
 import { CircleCard } from "../components/dashboard/CircleCard";
@@ -39,7 +39,12 @@ export default function Dashboard() {
     setShowAdd(false);
   }
 
-  function handleLogOut() {
+  async function handleLogOut() {
+    try {
+      await authApi.logout();
+    } catch {
+      // Clear local state regardless — worst case the cookie outlives its expiry on the server.
+    }
     clearSession();
     navigate("/");
   }

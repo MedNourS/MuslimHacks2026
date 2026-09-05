@@ -4,7 +4,6 @@
 // backend checkout next to it to regenerate from.
 
 import { resolveApiBaseUrl } from "@mednours/fronton/client";
-import { getToken } from "./session";
 
 import type { z } from "zod";
 import type { createBodySchema, updateBodySchema } from "../../../backend/src/endpoints/users/users.controller";
@@ -16,10 +15,10 @@ import type { createBodySchema as visitsCreateBodySchema } from "../../../backen
 const BASE_URL = resolveApiBaseUrl() || (import.meta.env.DEV ? "/api" : "");
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = getToken();
   const res = await fetch(BASE_URL + path, {
     ...init,
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: "Bearer " + token } : {}), ...(init && init.headers ? init.headers : {}) },
+    credentials: "include",
+    headers: { "Content-Type": "application/json", ...(init && init.headers ? init.headers : {}) },
   });
   if (!res.ok) {
     const errBody: any = await res.json().catch(() => undefined);
@@ -39,6 +38,7 @@ export const usersApi = {
 export const authApi = {
   signup: <T = unknown>(body: z.infer<typeof signupBodySchema>) => request<T>("/auth/signup", { method: "POST", body: JSON.stringify(body) }),
   login: <T = unknown>(body: z.infer<typeof loginBodySchema>) => request<T>("/auth/login", { method: "POST", body: JSON.stringify(body) }),
+  logout: <T = unknown>() => request<T>("/auth/logout", { method: "POST" }),
 };
 
 export const eldersApi = {

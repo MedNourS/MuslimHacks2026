@@ -37,7 +37,7 @@ export function SignUpForm({ className }: SignUpFormProps) {
     setSubmitting(true);
     try {
       const result = await authApi.signup<AuthResponse>({ name, email, phoneNumber, password });
-      saveSession(result.token, result.user);
+      saveSession(result.user);
 
       if (inviteCode) {
         try {
