@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [
     react(), tailwindcss(), obfuscateTailwind(), frontonCompression(),
     VitePWA({
-      registerType: "prompt",
+      registerType: "autoUpdate",
       includeAssets: ["icon-192.png", "icon-512.png"],
       manifest: {
         name: "Care Circle",
