@@ -1,4 +1,5 @@
-import { Link } from "react-router";
+import { Link, Navigate } from "react-router";
+import { getSessionUser } from "../lib/session";
 import heroWebp from "../assets/hero-elder-care.webp";
 import heroJpg from "../assets/hero-elder-care.jpg";
 import { buttonStyles } from "../components/shared/Button";
@@ -95,6 +96,8 @@ const ACCENT_CLASSES = {
 };
 
 export default function Home() {
+  if (getSessionUser()) return <Navigate to="/dashboard" replace />;
+
   return (
     <div className="min-h-screen bg-sand-100">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">

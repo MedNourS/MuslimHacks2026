@@ -12,7 +12,7 @@ const password = (globalThis as unknown as {
 
 const JWT_EXPIRY_SECONDS = 60 * 60 * 24 * 30;
 
-function jwtSecret() {
+export function jwtSecret() {
   const secret = process.env.JWT_SECRET;
   if (!secret) throw new AppError(500, "config_error", "JWT_SECRET is not set");
   return secret;

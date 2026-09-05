@@ -26,7 +26,7 @@ export function LoginForm({ className }: LoginFormProps) {
     try {
       const result = await authApi.login<AuthResponse>({ email, password });
       saveSession(result.token, result.user);
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Try again.");
     } finally {

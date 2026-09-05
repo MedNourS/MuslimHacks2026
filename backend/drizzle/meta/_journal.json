@@ -8,6 +8,13 @@
       "when": 1788639848058,
       "tag": "0000_freezing_puff_adder",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788644091332,
+      "tag": "0001_exotic_ezekiel",
+      "breakpoints": true
     }
   ]
 }

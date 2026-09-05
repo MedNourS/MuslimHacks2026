@@ -35,7 +35,7 @@ export function SignUpForm({ className }: SignUpFormProps) {
     try {
       const result = await authApi.signup<AuthResponse>({ name, email, phoneNumber, password });
       saveSession(result.token, result.user);
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Try again.");
     } finally {
