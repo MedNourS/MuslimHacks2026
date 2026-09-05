@@ -6,6 +6,10 @@ import { db } from "#config/db";
 import { users } from "#config/schema";
 import type { signupBodySchema, loginBodySchema } from "./auth.controller";
 
+const password = (globalThis as unknown as {
+  Bun: { password: { hash(password: string): Promise<string>; verify(password: string, hash: string): Promise<boolean> } };
+}).Bun.password;
+
 const JWT_EXPIRY_SECONDS = 60 * 60 * 24 * 30;
 
 function jwtSecret() {
@@ -32,7 +36,7 @@ export async function signup(body: z.infer<typeof signupBodySchema>) {
     throw new AppError(409, "email_taken", "An account with this email already exists");
   }
 
-  const passwordHash = await Bun.password.hash(body.password);
+  const passwordHash = await password.hash(body.password);
 
   const [user] = await db
     .insert(users)
@@ -54,7 +58,7 @@ export async function login(body: z.infer<typeof loginBodySchema>) {
     throw new AppError(401, "invalid_credentials", "Incorrect email or password");
   }
 
-  const valid = await Bun.password.verify(body.password, user.password);
+  const valid = await password.verify(body.password, user.password);
   if (!valid) {
     throw new AppError(401, "invalid_credentials", "Incorrect email or password");
   }
