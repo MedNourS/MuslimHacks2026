@@ -1,7 +1,20 @@
-// No tables yet — add one via `bun run add-table` (or server-config's
-// "Add a database table"). Each table becomes a real pgTable(...) export
-// here, picked up automatically by both db.ts's schema import and
-// drizzle-kit (see drizzle.config.ts) — nothing else needs to be told
-// about a new table by hand.
+import { integer, uuid, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 
-export {};
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  phoneNumber: text("phone_number").notNull().unique(),
+  password: text("password").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const elders = pgTable("elders", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  fullName: text("full_name").notNull(),
+  primaryContactId: integer("primary_contact_id")
+    .notNull()
+    .references(() => users.id),
+  inviteCode: text("invite_code").notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});

@@ -1,16 +1,16 @@
 import { lazy } from "react";
 import type { RouteObject } from "react-router";
 
-// Every page is lazy-loaded, so a first visit downloads only the route it
-// landed on instead of the whole app. Worth keeping that way as you add
-// pages — it's the single biggest thing you can do for load time here, and
-// `bun run add-page` writes new entries in this same form.
 const Home = lazy(() => import("./pages/Home"));
+const Login = lazy(() => import("./pages/Login"));
+const SignUp = lazy(() => import("./pages/SignUp"));
 // fronton:pages — `bun run add-page` inserts lazy imports above this line
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 export const routes: RouteObject[] = [
   { path: "/", element: <Home /> },
+  { path: "/login", element: <Login /> },
+  { path: "/signup", element: <SignUp /> },
   // fronton:routes — `bun run add-page` inserts route entries above this line
   { path: "*", element: <NotFound /> },
 ];
