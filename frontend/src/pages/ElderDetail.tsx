@@ -35,7 +35,10 @@ export default function ElderDetail() {
       .getById<CircleDetail>(id)
       .then(setCircle)
       .catch((err) => setError(err instanceof Error ? err.message : "Couldn't load this circle."));
-  }, [id, user, navigate]);
+    // `user` is re-parsed from localStorage on every render (new object each time), so it can't
+    // be a dependency here without re-running this effect (and re-fetching) on every render —
+    // depend on the stable primitive id instead.
+  }, [id, user?.id, navigate]);
 
   if (!user) return null;
 

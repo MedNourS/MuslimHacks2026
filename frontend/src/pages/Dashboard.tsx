@@ -25,7 +25,10 @@ export default function Dashboard() {
       .list<Circle[]>()
       .then(setCircles)
       .catch((err) => setError(err instanceof Error ? err.message : "Couldn't load your circles."));
-  }, [user, navigate]);
+    // `user` is re-parsed from localStorage on every render (new object each time), so it can't
+    // be a dependency here without re-running this effect (and re-fetching) on every render —
+    // depend on the stable primitive id instead.
+  }, [user?.id, navigate]);
 
   if (!user) return null;
 
