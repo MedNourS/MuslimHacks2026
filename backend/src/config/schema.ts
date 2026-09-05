@@ -38,3 +38,15 @@ export const careCircleMembers = pgTable(
     uniqueMembership: unique().on(t.elderId, t.userId),
   })
 );
+
+export const timelinePosts = pgTable("timeline_posts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  elderId: uuid("elder_id")
+    .notNull()
+    .references(() => elders.id, { onDelete: "cascade" }),
+  authorId: integer("author_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});

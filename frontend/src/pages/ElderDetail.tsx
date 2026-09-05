@@ -4,6 +4,7 @@ import { eldersApi } from "../lib/api";
 import type { CircleDetail } from "../lib/circles";
 import { getSessionUser } from "../lib/session";
 import { Button } from "../components/shared/Button";
+import { TimelineFeed } from "../components/timeline/TimelineFeed";
 
 const ROLE_LABEL: Record<CircleDetail["role"], string> = {
   family: "Family",
@@ -138,6 +139,8 @@ export default function ElderDetail() {
                 ))}
               </ul>
             </div>
+
+            <TimelineFeed elderId={circle.id} />
           </>
         )}
       </main>

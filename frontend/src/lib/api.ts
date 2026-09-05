@@ -10,6 +10,7 @@ import type { z } from "zod";
 import type { createBodySchema, updateBodySchema } from "../../../backend/src/endpoints/users/users.controller";
 import type { signupBodySchema, loginBodySchema } from "../../../backend/src/endpoints/auth/auth.controller";
 import type { createBodySchema as eldersCreateBodySchema, joinBodySchema } from "../../../backend/src/endpoints/elders/elders.controller";
+import type { createBodySchema as timelineCreateBodySchema } from "../../../backend/src/endpoints/timeline/timeline.controller";
 
 const BASE_URL = resolveApiBaseUrl() || (import.meta.env.DEV ? "/api" : "");
 
@@ -48,4 +49,9 @@ export const eldersApi = {
   join: <T = unknown>(body: z.infer<typeof joinBodySchema>) => request<T>("/elders/join", { method: "POST", body: JSON.stringify(body) }),
   list: <T = unknown>() => request<T>("/elders"),
   getById: <T = unknown>(params: { id: string }) => request<T>("/elders/" + params.id),
+};
+
+export const timelineApi = {
+  create: <T = unknown>(elderId: string, body: z.infer<typeof timelineCreateBodySchema>) => request<T>("/timeline/" + elderId, { method: "POST", body: JSON.stringify(body) }),
+  list: <T = unknown>(elderId: string) => request<T>("/timeline/" + elderId),
 };
