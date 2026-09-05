@@ -29,6 +29,8 @@ export default function Dashboard() {
 
   if (!user) return null;
 
+  const isElderOnly = circles !== null && circles.length > 0 && circles.every((c) => c.role === "elder");
+
   function handleAdded(circle: Circle) {
     setCircles((prev) => [...(prev ?? []), circle]);
     setShowAdd(false);
@@ -68,7 +70,7 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {!showAdd && (
+            {!isElderOnly && !showAdd && (
               <button
                 onClick={() => setShowAdd(true)}
                 className="mt-6 text-sm font-semibold text-sage-700 hover:text-sage-500"
@@ -83,7 +85,7 @@ export default function Dashboard() {
           <p className="mt-3 max-w-md text-ink-700">You're not in a circle yet. Start one, or join with a code someone sent you.</p>
         )}
 
-        {circles && (circles.length === 0 || showAdd) && (
+        {circles && !isElderOnly && (circles.length === 0 || showAdd) && (
           <div className="mt-6 grid max-w-2xl gap-5 sm:grid-cols-2">
             <CreateCircleForm onCreated={handleAdded} />
             <JoinCircleForm onJoined={handleAdded} />

@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import type { z } from "zod";
 import { AppError } from "@mednours/backon";
 import { db } from "../../config/db";
-import { careCircleMembers, elders } from "../../config/schema";
+import { careCircleMembers, elders, users } from "../../config/schema";
 import type { createBodySchema, joinBodySchema } from "./elders.controller";
 
 const INVITE_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -51,7 +51,16 @@ export async function join(userId: number, body: z.infer<typeof joinBodySchema>)
     throw new AppError(409, "already_member", "You're already in this circle");
   }
 
-  await db.insert(careCircleMembers).values({ elderId: elder.id, userId, role: "family" });
+  if (body.asElder) {
+    const existingElder = await db.query.careCircleMembers.findFirst({
+      where: and(eq(careCircleMembers.elderId, elder.id), eq(careCircleMembers.role, "elder")),
+    });
+    if (existingElder) {
+      throw new AppError(409, "elder_already_linked", "This circle already has an elder account linked");
+    }
+  }
+
+  await db.insert(careCircleMembers).values({ elderId: elder.id, userId, role: body.asElder ? "elder" : "family" });
   return elder;
 }
 
@@ -66,4 +75,37 @@ export async function list(userId: number) {
     .from(careCircleMembers)
     .innerJoin(elders, eq(careCircleMembers.elderId, elders.id))
     .where(eq(careCircleMembers.userId, userId));
+}
+
+export async function getById(userId: number, elderId: string) {
+  const membership = await db.query.careCircleMembers.findFirst({
+    where: and(eq(careCircleMembers.elderId, elderId), eq(careCircleMembers.userId, userId)),
+  });
+  if (!membership) {
+    throw new AppError(404, "not_found", "Circle not found");
+  }
+
+  const elder = await db.query.elders.findFirst({ where: eq(elders.id, elderId) });
+  if (!elder) {
+    throw new AppError(404, "not_found", "Circle not found");
+  }
+
+  const members = await db
+    .select({
+      userId: users.id,
+      name: users.name,
+      email: users.email,
+      role: careCircleMembers.role,
+    })
+    .from(careCircleMembers)
+    .innerJoin(users, eq(careCircleMembers.userId, users.id))
+    .where(eq(careCircleMembers.elderId, elderId));
+
+  return {
+    id: elder.id,
+    fullName: elder.fullName,
+    inviteCode: elder.inviteCode,
+    role: membership.role,
+    members,
+  };
 }

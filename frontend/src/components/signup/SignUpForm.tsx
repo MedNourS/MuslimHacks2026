@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router";
-import { authApi } from "../../lib/api";
+import { Link, useNavigate, useSearchParams } from "react-router";
+import { authApi, eldersApi } from "../../lib/api";
 import { isValidPhoneNumber } from "../../lib/phone";
 import { saveSession, type AuthResponse } from "../../lib/session";
 import { Button } from "../shared/Button";
@@ -13,6 +13,9 @@ export interface SignUpFormProps {
 
 export function SignUpForm({ className }: SignUpFormProps) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const inviteCode = searchParams.get("inviteCode");
+  const asElder = searchParams.get("asElder") === "1";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -35,6 +38,16 @@ export function SignUpForm({ className }: SignUpFormProps) {
     try {
       const result = await authApi.signup<AuthResponse>({ name, email, phoneNumber, password });
       saveSession(result.token, result.user);
+
+      if (inviteCode) {
+        try {
+          await eldersApi.join({ inviteCode, asElder });
+        } catch (joinErr) {
+          // Account was created either way — surface the join problem but don't block navigation.
+          setError(joinErr instanceof Error ? joinErr.message : "Couldn't join that circle automatically.");
+        }
+      }
+
       navigate("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Try again.");
@@ -46,7 +59,9 @@ export function SignUpForm({ className }: SignUpFormProps) {
   return (
     <form onSubmit={handleSubmit} className={clsx("w-full max-w-sm rounded-[20px] border border-black/10 bg-white p-7", className)}>
       <h1 className="text-lg font-extrabold text-ink-900">Create your account</h1>
-      <p className="mb-5 text-xs text-ink-500">Start coordinating care for a family member.</p>
+      <p className="mb-5 text-xs text-ink-500">
+        {inviteCode ? "You've been invited to a care circle." : "Start coordinating care for a family member."}
+      </p>
 
       <Field
         label="Full name"

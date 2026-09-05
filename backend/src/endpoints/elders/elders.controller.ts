@@ -16,6 +16,7 @@ export const create = defineRoute({ body: createBodySchema }, async (c, { body }
 
 export const joinBodySchema = z.object({
   inviteCode: z.string().min(1, "Invite code is required"),
+  asElder: z.boolean().optional(),
 });
 export const join = defineRoute({ body: joinBodySchema }, async (c, { body }) => {
   const result = await service.join(authedUserId(c), body);
@@ -24,5 +25,11 @@ export const join = defineRoute({ body: joinBodySchema }, async (c, { body }) =>
 
 export const list = defineRoute({}, async (c) => {
   const result = await service.list(authedUserId(c));
+  return c.json(result);
+});
+
+export const getByIdParamsSchema = z.object({ id: z.string().uuid() });
+export const getById = defineRoute({ params: getByIdParamsSchema }, async (c, { params }) => {
+  const result = await service.getById(authedUserId(c), params.id);
   return c.json(result);
 });

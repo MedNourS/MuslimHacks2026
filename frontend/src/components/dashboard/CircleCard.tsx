@@ -1,14 +1,19 @@
+import { Link } from "react-router";
 import type { Circle } from "../../lib/circles";
 
 const ROLE_LABEL: Record<Circle["role"], string> = {
   family: "Family",
   home_aide: "Home aide",
   other: "Member",
+  elder: "Elder",
 };
 
 export function CircleCard({ circle }: { circle: Circle }) {
   return (
-    <div className="rounded-2xl border border-black/10 bg-white p-6">
+    <Link
+      to={"/circles/" + circle.id}
+      className="block rounded-2xl border border-black/10 bg-white p-6 transition-shadow hover:shadow-md"
+    >
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-base font-bold text-ink-900">{circle.fullName}</h3>
@@ -22,6 +27,6 @@ export function CircleCard({ circle }: { circle: Circle }) {
         <span className="text-xs text-ink-500">Invite code</span>
         <span className="font-mono text-sm font-semibold tracking-wider text-ink-900">{circle.inviteCode}</span>
       </div>
-    </div>
+    </Link>
   );
 }

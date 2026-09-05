@@ -12,6 +12,7 @@ export interface JoinCircleFormProps {
 
 export function JoinCircleForm({ onJoined, className }: JoinCircleFormProps) {
   const [inviteCode, setInviteCode] = useState("");
+  const [asElder, setAsElder] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -20,7 +21,7 @@ export function JoinCircleForm({ onJoined, className }: JoinCircleFormProps) {
     setError(null);
     setSubmitting(true);
     try {
-      const elder = await eldersApi.join<Circle>({ inviteCode });
+      const elder = await eldersApi.join<Circle>({ inviteCode, asElder });
       onJoined(elder);
       setInviteCode("");
     } catch (err) {
@@ -44,6 +45,16 @@ export function JoinCircleForm({ onJoined, className }: JoinCircleFormProps) {
         maxLength={6}
         required
       />
+
+      <label className="mb-4 flex items-center gap-2 text-sm text-ink-700">
+        <input
+          type="checkbox"
+          checked={asElder}
+          onChange={(e) => setAsElder(e.target.checked)}
+          className="h-4 w-4 rounded border-black/20 text-sage-500 focus:ring-sage-300"
+        />
+        I'm the person being cared for
+      </label>
 
       {error && <p className="mb-4 text-sm font-medium text-danger-600">{error}</p>}
 

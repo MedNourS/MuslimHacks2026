@@ -9,3 +9,4 @@ eldersRoutes.use("*", requireAuth({ secret: jwtSecret() }));
 eldersRoutes.post("/", controller.create);
 eldersRoutes.post("/join", controller.join);
 eldersRoutes.get("/", controller.list);
+eldersRoutes.get("/:id", controller.getById);

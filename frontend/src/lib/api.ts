@@ -47,4 +47,5 @@ export const eldersApi = {
   create: <T = unknown>(body: z.infer<typeof eldersCreateBodySchema>) => request<T>("/elders", { method: "POST", body: JSON.stringify(body) }),
   join: <T = unknown>(body: z.infer<typeof joinBodySchema>) => request<T>("/elders/join", { method: "POST", body: JSON.stringify(body) }),
   list: <T = unknown>() => request<T>("/elders"),
+  getById: <T = unknown>(params: { id: string }) => request<T>("/elders/" + params.id),
 };

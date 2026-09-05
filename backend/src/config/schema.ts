@@ -19,7 +19,7 @@ export const elders = pgTable("elders", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const memberRole = pgEnum("member_role", ["family", "home_aide", "other"]);
+export const memberRole = pgEnum("member_role", ["family", "home_aide", "other", "elder"]);
 
 export const careCircleMembers = pgTable(
   "care_circle_members",
