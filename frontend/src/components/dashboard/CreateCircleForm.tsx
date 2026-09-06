@@ -12,6 +12,8 @@ export interface CreateCircleFormProps {
 
 export function CreateCircleForm({ onCreated, className }: CreateCircleFormProps) {
   const [fullName, setFullName] = useState("");
+  const [area, setArea] = useState("");
+  const [address, setAddress] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -20,9 +22,11 @@ export function CreateCircleForm({ onCreated, className }: CreateCircleFormProps
     setError(null);
     setSubmitting(true);
     try {
-      const elder = await eldersApi.create<Circle>({ fullName });
+      const elder = await eldersApi.create<Circle>({ fullName, area, address: address.trim() || undefined });
       onCreated(elder);
       setFullName("");
+      setArea("");
+      setAddress("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Try again.");
     } finally {
@@ -42,6 +46,25 @@ export function CreateCircleForm({ onCreated, className }: CreateCircleFormProps
         value={fullName}
         onChange={(e) => setFullName(e.target.value)}
         required
+      />
+
+      <Field
+        label="General area"
+        type="text"
+        placeholder="Verdun, Montreal"
+        value={area}
+        onChange={(e) => setArea(e.target.value)}
+        helperText="Shown to volunteers browsing requests — never their exact address."
+        required
+      />
+
+      <Field
+        label="Address (optional)"
+        type="text"
+        placeholder="123 Rue Wellington"
+        value={address}
+        onChange={(e) => setAddress(e.target.value)}
+        helperText="Only ever shown to the family, the elder, and a confirmed volunteer."
       />
 
       {error && <p className="mb-4 text-sm font-medium text-danger-600">{error}</p>}

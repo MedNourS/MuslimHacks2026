@@ -3,15 +3,17 @@ import { Link, useNavigate, useParams } from "react-router";
 import { eldersApi } from "../lib/api";
 import type { CircleDetail } from "../lib/circles";
 import { getSessionUser } from "../lib/session";
+import { AppHeader } from "../components/shared/AppHeader";
 import { Button } from "../components/shared/Button";
 import { TimelineFeed } from "../components/timeline/TimelineFeed";
 import { VisitsPanel } from "../components/visits/VisitsPanel";
+import { ElderSimpleView } from "../components/elder/ElderSimpleView";
 
 const ROLE_LABEL: Record<CircleDetail["role"], string> = {
   family: "Family",
-  home_aide: "Home aide",
   other: "Member",
   elder: "Elder",
+  volunteer: "Volunteer",
 };
 
 export default function ElderDetail() {
@@ -65,18 +67,20 @@ export default function ElderDetail() {
     }
   }
 
+  // The elder gets a deliberately minimal, read-mostly view — no posting, no member
+  // management, no circle admin. Just "who's visiting" and the timeline.
+  if (circle && circle.role === "elder") {
+    return (
+      <div className="min-h-screen bg-sand-100">
+        <AppHeader />
+        <ElderSimpleView elderId={circle.id} fullName={circle.fullName} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-sand-100">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <Link to="/dashboard" className="flex items-center gap-2.5">
-          <svg viewBox="0 0 64 64" className="h-8 w-8" aria-hidden="true">
-            <circle cx="41.53" cy="37.5" r="20" fill="#4A7C6B" opacity="0.9" />
-            <circle cx="22.47" cy="37.5" r="20" fill="#C9784F" opacity="0.85" />
-            <circle cx="32" cy="21" r="20" fill="#D4A94A" opacity="0.95" />
-          </svg>
-          <span className="text-lg font-extrabold text-ink-900">Care Circle</span>
-        </Link>
-      </header>
+      <AppHeader />
 
       <main className="mx-auto max-w-3xl px-6 py-6">
         <Link to="/dashboard" className="text-sm font-semibold text-sage-700 hover:text-sage-500">
@@ -95,23 +99,26 @@ export default function ElderDetail() {
                 <p className="mt-0.5 text-xs font-semibold uppercase tracking-wide text-sage-700">
                   You're in this circle as {ROLE_LABEL[circle.role]}
                 </p>
+                <p className="mt-1 text-sm text-ink-500">{circle.address ?? circle.area}</p>
               </div>
             </div>
 
-            <div className="mt-6 rounded-2xl border border-black/10 bg-white p-6">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-bold text-ink-900">Invite code</p>
-                  <p className="mt-1 font-mono text-lg font-semibold tracking-wider text-ink-900">{circle.inviteCode}</p>
+            {(circle.role === "family" || circle.role === "elder") && (
+              <div className="mt-6 rounded-2xl border border-black/10 bg-white p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-bold text-ink-900">Invite code</p>
+                    <p className="mt-1 font-mono text-lg font-semibold tracking-wider text-ink-900">{circle.inviteCode}</p>
+                  </div>
+                  <Button variant="secondary" onClick={handleCopy}>
+                    {copied ? "Copied" : "Copy"}
+                  </Button>
                 </div>
-                <Button variant="secondary" onClick={handleCopy}>
-                  {copied ? "Copied" : "Copy"}
-                </Button>
+                <p className="mt-3 text-xs text-ink-500">Share this code with anyone who should join {circle.fullName}'s circle.</p>
               </div>
-              <p className="mt-3 text-xs text-ink-500">Share this code with anyone who should join {circle.fullName}'s circle.</p>
-            </div>
+            )}
 
-            {!circle.members.some((m) => m.role === "elder") && (
+            {circle.role === "family" && !circle.members.some((m) => m.role === "elder") && (
               <div className="mt-6 rounded-2xl border border-black/10 bg-white p-6">
                 <p className="text-sm font-bold text-ink-900">Invite {circle.fullName} to their own account</p>
                 <p className="mt-1 text-xs text-ink-500">
@@ -144,7 +151,7 @@ export default function ElderDetail() {
               </ul>
             </div>
 
-            <VisitsPanel elderId={circle.id} />
+            <VisitsPanel elderId={circle.id} role={circle.role} currentUserId={user.id} />
             <TimelineFeed elderId={circle.id} />
           </>
         )}

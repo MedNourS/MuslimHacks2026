@@ -36,6 +36,9 @@ export const signupBodySchema = z.object({
     .transform((val) => normalizePhoneNumber(val))
     .refine((val) => PHONE_REGEX.test(val), "Enter a valid phone number, e.g. +15145550123"),
   password: z.string().min(8, "Password must be at least 8 characters"),
+  accountType: z.enum(["family", "volunteer"]).optional(),
+  // Volunteers only — a coarse area they're willing to help in, e.g. "Verdun, Montreal".
+  preferredArea: z.string().min(1).optional(),
 });
 export const signup = defineRoute({ body: signupBodySchema }, async (c, { body }) => {
   const result = await service.signup(body);

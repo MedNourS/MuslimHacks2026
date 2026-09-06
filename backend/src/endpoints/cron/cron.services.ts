@@ -42,7 +42,9 @@ export async function runVisitDigest() {
     })
     .from(visits)
     .innerJoin(users, eq(visits.visitorId, users.id))
-    .where(and(gte(visits.scheduledAt, startOfDay), lt(visits.scheduledAt, endOfDay)));
+    .where(
+      and(gte(visits.scheduledAt, startOfDay), lt(visits.scheduledAt, endOfDay), eq(visits.status, "confirmed"))
+    );
 
   if (todaysVisits.length === 0) return { eldersNotified: 0, visits: 0 };
 

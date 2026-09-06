@@ -16,11 +16,13 @@ export function SignUpForm({ className }: SignUpFormProps) {
   const [searchParams] = useSearchParams();
   const inviteCode = searchParams.get("inviteCode");
   const asElder = searchParams.get("asElder") === "1";
+  const [accountType, setAccountType] = useState<"family" | "volunteer">("family");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
+  const [preferredArea, setPreferredArea] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -36,7 +38,14 @@ export function SignUpForm({ className }: SignUpFormProps) {
 
     setSubmitting(true);
     try {
-      const result = await authApi.signup<AuthResponse>({ name, email, phoneNumber, password });
+      const result = await authApi.signup<AuthResponse>({
+        name,
+        email,
+        phoneNumber,
+        password,
+        accountType,
+        preferredArea: accountType === "volunteer" ? preferredArea : undefined,
+      });
       saveSession(result.user);
 
       if (inviteCode) {
@@ -60,8 +69,33 @@ export function SignUpForm({ className }: SignUpFormProps) {
     <form onSubmit={handleSubmit} className={clsx("w-full max-w-sm rounded-[20px] border border-black/10 bg-white p-7", className)}>
       <h1 className="text-lg font-extrabold text-ink-900">Create your account</h1>
       <p className="mb-5 text-xs text-ink-500">
-        {inviteCode ? "You've been invited to a care circle." : "Start coordinating care for a family member."}
+        {inviteCode ? "You've been invited to a care circle." : "Coordinate care for a family member, or volunteer to help someone in your community."}
       </p>
+
+      {!inviteCode && (
+        <div className="mb-4 grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => setAccountType("family")}
+            className={clsx(
+              "rounded-lg border-1.5 px-3 py-2.5 text-sm font-semibold transition-colors",
+              accountType === "family" ? "border-sage-500 bg-sage-50 text-sage-700" : "border-ink-200 text-ink-500"
+            )}
+          >
+            I'm family
+          </button>
+          <button
+            type="button"
+            onClick={() => setAccountType("volunteer")}
+            className={clsx(
+              "rounded-lg border-1.5 px-3 py-2.5 text-sm font-semibold transition-colors",
+              accountType === "volunteer" ? "border-sage-500 bg-sage-50 text-sage-700" : "border-ink-200 text-ink-500"
+            )}
+          >
+            I'm volunteering
+          </button>
+        </div>
+      )}
 
       <Field
         label="Full name"
@@ -109,6 +143,17 @@ export function SignUpForm({ className }: SignUpFormProps) {
         onChange={(e) => setPassword(e.target.value)}
         required
       />
+      {!inviteCode && accountType === "volunteer" && (
+        <Field
+          label="Area you can help in"
+          type="text"
+          placeholder="Verdun, Montreal"
+          value={preferredArea}
+          onChange={(e) => setPreferredArea(e.target.value)}
+          helperText="Shown so you can browse requests near you."
+          required
+        />
+      )}
 
       {error && <p className="mb-4 text-sm font-medium text-danger-600">{error}</p>}
 

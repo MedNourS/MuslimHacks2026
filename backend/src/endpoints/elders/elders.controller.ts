@@ -8,6 +8,8 @@ function authedUserId(c: BackonContext) {
 
 export const createBodySchema = z.object({
   fullName: z.string().min(1, "Name is required"),
+  area: z.string().min(1, "Add a general area, e.g. \"Verdun, Montreal\""),
+  address: z.string().min(1).optional(),
 });
 export const create = defineRoute({ body: createBodySchema }, async (c, { body }) => {
   const result = await service.create(authedUserId(c), body);

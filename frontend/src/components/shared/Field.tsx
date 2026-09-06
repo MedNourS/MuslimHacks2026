@@ -22,7 +22,7 @@ export function Field({ label, error, helperText, id, className, ...rest }: Fiel
           "w-full rounded-lg border-1.5 px-3.5 py-3 text-base text-ink-900 outline-none transition-colors",
           "placeholder:text-ink-400",
           "focus:border-sage-500 focus:ring-3 focus:ring-sage-100",
-          error ? "border-danger-500" : "border-black/10",
+          error ? "border-danger-500" : "border-ink-200",
           className
         )}
         aria-invalid={Boolean(error)}

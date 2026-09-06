@@ -10,7 +10,7 @@ import type { createBodySchema, updateBodySchema } from "../../../backend/src/en
 import type { signupBodySchema, loginBodySchema } from "../../../backend/src/endpoints/auth/auth.controller";
 import type { createBodySchema as eldersCreateBodySchema, joinBodySchema } from "../../../backend/src/endpoints/elders/elders.controller";
 import type { createBodySchema as timelineCreateBodySchema } from "../../../backend/src/endpoints/timeline/timeline.controller";
-import type { createBodySchema as visitsCreateBodySchema } from "../../../backend/src/endpoints/visits/visits.controller";
+import type { createBodySchema as visitsCreateBodySchema, geoBodySchema as visitsGeoBodySchema } from "../../../backend/src/endpoints/visits/visits.controller";
 
 const BASE_URL = resolveApiBaseUrl() || (import.meta.env.DEV ? "/api" : "");
 
@@ -54,8 +54,16 @@ export const timelineApi = {
 };
 
 export const visitsApi = {
+  listOpen: <T = unknown>() => request<T>("/visits/open"),
+  listMine: <T = unknown>() => request<T>("/visits/mine"),
   create: <T = unknown>(elderId: string, body: z.infer<typeof visitsCreateBodySchema>) => request<T>("/visits/" + elderId, { method: "POST", body: JSON.stringify(body) }),
   list: <T = unknown>(elderId: string) => request<T>("/visits/" + elderId),
+  claim: <T = unknown>(visitId: string) => request<T>("/visits/" + visitId + "/claim", { method: "POST" }),
+  confirm: <T = unknown>(visitId: string) => request<T>("/visits/" + visitId + "/confirm", { method: "POST" }),
+  decline: <T = unknown>(visitId: string) => request<T>("/visits/" + visitId + "/decline", { method: "POST" }),
+  cancel: <T = unknown>(visitId: string) => request<T>("/visits/" + visitId + "/cancel", { method: "POST" }),
+  checkIn: <T = unknown>(visitId: string, body: z.infer<typeof visitsGeoBodySchema>) => request<T>("/visits/" + visitId + "/check-in", { method: "POST", body: JSON.stringify(body) }),
+  checkOut: <T = unknown>(visitId: string, body: z.infer<typeof visitsGeoBodySchema>) => request<T>("/visits/" + visitId + "/check-out", { method: "POST", body: JSON.stringify(body) }),
 };
 
 export const cronApi = {

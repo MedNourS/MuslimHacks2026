@@ -1,4 +1,4 @@
-export type CircleRole = "family" | "home_aide" | "other" | "elder";
+export type CircleRole = "family" | "other" | "elder" | "volunteer";
 
 export interface Circle {
   id: string;
@@ -15,5 +15,7 @@ export interface CircleMember {
 }
 
 export interface CircleDetail extends Circle {
+  area: string;
+  address: string | null;
   members: CircleMember[];
 }

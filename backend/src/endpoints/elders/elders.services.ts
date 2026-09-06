@@ -29,7 +29,7 @@ export async function create(userId: number, body: z.infer<typeof createBodySche
 
   const [elder] = await db
     .insert(elders)
-    .values({ fullName: body.fullName, primaryContactId: userId, inviteCode })
+    .values({ fullName: body.fullName, primaryContactId: userId, inviteCode, area: body.area, address: body.address })
     .returning();
 
   await db.insert(careCircleMembers).values({ elderId: elder.id, userId, role: "family" });
@@ -105,6 +105,10 @@ export async function getById(userId: number, elderId: string) {
     id: elder.id,
     fullName: elder.fullName,
     inviteCode: elder.inviteCode,
+    area: elder.area,
+    // Precise address — only ever returned here, gated by the membership check above. Never
+    // included in the open-postings browse list (see visits.services.ts listOpen()).
+    address: elder.address,
     role: membership.role,
     members,
   };

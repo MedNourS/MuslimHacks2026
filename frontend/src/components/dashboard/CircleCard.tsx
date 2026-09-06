@@ -3,9 +3,9 @@ import type { Circle } from "../../lib/circles";
 
 const ROLE_LABEL: Record<Circle["role"], string> = {
   family: "Family",
-  home_aide: "Home aide",
   other: "Member",
   elder: "Elder",
+  volunteer: "Volunteer",
 };
 
 export function CircleCard({ circle }: { circle: Circle }) {

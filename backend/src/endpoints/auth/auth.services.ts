@@ -26,8 +26,22 @@ async function issueToken(user: { id: number; email: string; name: string }) {
   );
 }
 
-function toPublicUser(user: { id: number; name: string; email: string; phoneNumber: string }) {
-  return { id: user.id, name: user.name, email: user.email, phoneNumber: user.phoneNumber };
+function toPublicUser(user: {
+  id: number;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  accountType: "family" | "volunteer";
+  preferredArea: string | null;
+}) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phoneNumber: user.phoneNumber,
+    accountType: user.accountType,
+    preferredArea: user.preferredArea,
+  };
 }
 
 export async function signup(body: z.infer<typeof signupBodySchema>) {
@@ -37,6 +51,7 @@ export async function signup(body: z.infer<typeof signupBodySchema>) {
   }
 
   const passwordHash = await password.hash(body.password);
+  const accountType = body.accountType ?? "family";
 
   const [user] = await db
     .insert(users)
@@ -45,6 +60,8 @@ export async function signup(body: z.infer<typeof signupBodySchema>) {
       email: body.email,
       phoneNumber: body.phoneNumber,
       password: passwordHash,
+      accountType,
+      preferredArea: accountType === "volunteer" ? body.preferredArea : undefined,
     })
     .returning();
 

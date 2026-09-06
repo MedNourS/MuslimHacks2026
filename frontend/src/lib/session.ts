@@ -3,6 +3,8 @@ export interface SessionUser {
   name: string;
   email: string;
   phoneNumber: string;
+  accountType: "family" | "volunteer";
+  preferredArea: string | null;
 }
 
 export interface AuthResponse {
