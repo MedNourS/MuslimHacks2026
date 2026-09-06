@@ -2,13 +2,18 @@
 // Re-run that after changing routes in the backend. Committed rather than
 // gitignored on purpose: a deploy builds this project on its own, with no
 // backend checkout next to it to regenerate from.
+//
+// NOTE: the generator misses routes registered with inline middleware (e.g.
+// authApi.updateVolunteer) and collides on repeated schema names like
+// createBodySchema across endpoint modules — both are patched back in by hand
+// after every regen. See git history / commit messages for the pattern.
 
 import { resolveApiBaseUrl } from "@mednours/fronton/client";
 
 import type { z } from "zod";
-import type { signupBodySchema, loginBodySchema, updateVolunteerBodySchema } from "../../../backend/src/endpoints/auth/auth.controller";
+import type { signupBodySchema, loginBodySchema, forgotPasswordBodySchema, resetPasswordBodySchema, updateVolunteerBodySchema } from "../../../backend/src/endpoints/auth/auth.controller";
 import type { createBodySchema as eldersCreateBodySchema, joinBodySchema } from "../../../backend/src/endpoints/elders/elders.controller";
-import type { createBodySchema as timelineCreateBodySchema } from "../../../backend/src/endpoints/timeline/timeline.controller";
+import type { createBodySchema as timelineCreateBodySchema, updateBodySchema as timelineUpdateBodySchema } from "../../../backend/src/endpoints/timeline/timeline.controller";
 import type { createBodySchema as visitsCreateBodySchema, geoBodySchema as visitsGeoBodySchema } from "../../../backend/src/endpoints/visits/visits.controller";
 
 const BASE_URL = resolveApiBaseUrl() || (import.meta.env.DEV ? "/api" : "");
@@ -16,7 +21,6 @@ const BASE_URL = resolveApiBaseUrl() || (import.meta.env.DEV ? "/api" : "");
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(BASE_URL + path, {
     ...init,
-    credentials: "include",
     headers: { "Content-Type": "application/json", ...(init && init.headers ? init.headers : {}) },
   });
   if (!res.ok) {
@@ -30,8 +34,9 @@ export const authApi = {
   signup: <T = unknown>(body: z.infer<typeof signupBodySchema>) => request<T>("/auth/signup", { method: "POST", body: JSON.stringify(body) }),
   login: <T = unknown>(body: z.infer<typeof loginBodySchema>) => request<T>("/auth/login", { method: "POST", body: JSON.stringify(body) }),
   logout: <T = unknown>() => request<T>("/auth/logout", { method: "POST" }),
-  updateVolunteer: <T = unknown>(body: z.infer<typeof updateVolunteerBodySchema>) =>
-    request<T>("/auth/volunteer", { method: "PATCH", body: JSON.stringify(body) }),
+  forgotPassword: <T = unknown>(body: z.infer<typeof forgotPasswordBodySchema>) => request<T>("/auth/forgot-password", { method: "POST", body: JSON.stringify(body) }),
+  resetPassword: <T = unknown>(body: z.infer<typeof resetPasswordBodySchema>) => request<T>("/auth/reset-password", { method: "POST", body: JSON.stringify(body) }),
+  updateVolunteer: <T = unknown>(body: z.infer<typeof updateVolunteerBodySchema>) => request<T>("/auth/volunteer", { method: "PATCH", body: JSON.stringify(body) }),
 };
 
 export const eldersApi = {
@@ -44,6 +49,7 @@ export const eldersApi = {
 export const timelineApi = {
   create: <T = unknown>(elderId: string, body: z.infer<typeof timelineCreateBodySchema>) => request<T>("/timeline/" + elderId, { method: "POST", body: JSON.stringify(body) }),
   list: <T = unknown>(elderId: string) => request<T>("/timeline/" + elderId),
+  update: <T = unknown>(postId: string, body: z.infer<typeof timelineUpdateBodySchema>) => request<T>("/timeline/post/" + postId, { method: "PATCH", body: JSON.stringify(body) }),
 };
 
 export const visitsApi = {
@@ -55,10 +61,8 @@ export const visitsApi = {
   confirm: <T = unknown>(visitId: string) => request<T>("/visits/" + visitId + "/confirm", { method: "POST" }),
   decline: <T = unknown>(visitId: string) => request<T>("/visits/" + visitId + "/decline", { method: "POST" }),
   cancel: <T = unknown>(visitId: string) => request<T>("/visits/" + visitId + "/cancel", { method: "POST" }),
-  checkIn: <T = unknown>(visitId: string, body: z.infer<typeof visitsGeoBodySchema>) =>
-    request<T>("/visits/" + visitId + "/check-in", { method: "POST", body: JSON.stringify(body) }),
-  checkOut: <T = unknown>(visitId: string, body: z.infer<typeof visitsGeoBodySchema>) =>
-    request<T>("/visits/" + visitId + "/check-out", { method: "POST", body: JSON.stringify(body) }),
+  checkIn: <T = unknown>(visitId: string, body: z.infer<typeof visitsGeoBodySchema>) => request<T>("/visits/" + visitId + "/check-in", { method: "POST", body: JSON.stringify(body) }),
+  checkOut: <T = unknown>(visitId: string, body: z.infer<typeof visitsGeoBodySchema>) => request<T>("/visits/" + visitId + "/check-out", { method: "POST", body: JSON.stringify(body) }),
 };
 
 export const cronApi = {

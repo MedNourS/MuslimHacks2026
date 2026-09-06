@@ -99,7 +99,7 @@ export async function list(userId: number, elderId: string) {
 }
 
 export async function listOpen(userId: number) {
-  await requireVolunteer(userId);
+  const volunteer = await requireVolunteer(userId);
   const rows = await db
     .select({
       id: visits.id,
@@ -115,8 +115,14 @@ export async function listOpen(userId: number) {
     .where(eq(visits.status, "open"))
     .orderBy(desc(visits.createdAt));
 
+  // A volunteer only ever sets one coarse area (see signup/updateVolunteer), so this is a
+  // straight string match, not a real distance calculation — that's the honest scope of "area
+  // matching" without geocoding anything. Matches float to the top; within each group, postings
+  // stay in the most-recent-first order the query already returned (Array#sort is stable).
+  const preferredArea = volunteer.preferredArea?.trim().toLowerCase() || null;
+
   // First name only, and area instead of address — a browsing volunteer hasn't been matched yet.
-  return rows.map((r) => ({
+  const postings = rows.map((r) => ({
     id: r.id,
     elderId: r.elderId,
     elderFirstName: r.elderFullName.split(" ")[0],
@@ -124,7 +130,10 @@ export async function listOpen(userId: number) {
     scheduledAt: r.scheduledAt,
     notes: r.notes,
     postedAt: r.createdAt,
+    matchesArea: preferredArea !== null && r.area.trim().toLowerCase() === preferredArea,
   }));
+
+  return postings.sort((a, b) => Number(b.matchesArea) - Number(a.matchesArea));
 }
 
 export async function listMine(userId: number) {

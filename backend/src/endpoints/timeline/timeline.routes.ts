@@ -9,3 +9,4 @@ timelineRoutes.use("*", requireAuthCookie({ secret: jwtSecret() }));
 
 timelineRoutes.post("/:elderId", controller.create);
 timelineRoutes.get("/:elderId", controller.list);
+timelineRoutes.patch("/post/:postId", controller.update);

@@ -9,6 +9,9 @@ export interface OpenPosting {
   scheduledAt: string;
   notes: string | null;
   postedAt: string;
+  // True when this posting's area matches the volunteer's own preferred area. The list is
+  // already sorted with matches first — this is what lets the UI label why.
+  matchesArea: boolean;
 }
 
 // A posting as the volunteer who claimed it sees it — address appears once confirmed.

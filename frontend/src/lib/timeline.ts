@@ -4,3 +4,7 @@ export interface TimelinePost {
   createdAt: string;
   author: { id: number; name: string };
 }
+
+export interface UpdateTimelinePostBody {
+  body: string;
+}

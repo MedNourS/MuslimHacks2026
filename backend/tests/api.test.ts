@@ -5,10 +5,17 @@
 // id and let the cleanup at the bottom delete it — don't leave rows behind (we've had to do a
 // manual cleanup sweep of leftover test accounts before; this file is what replaces that).
 import { describe, test, expect, afterAll } from "bun:test";
+import { createHash } from "node:crypto";
 import { eq, inArray } from "drizzle-orm";
 import { app } from "../src/app";
 import { db } from "../src/config/db";
-import { elders, users } from "../src/config/schema";
+import { elders, passwordResetTokens, users } from "../src/config/schema";
+
+// Mirrors the private hashResetToken() in auth.services.ts (sha256 hex) — tests own this token
+// directly since the API, correctly, never returns one.
+function hashResetToken(token: string) {
+  return createHash("sha256").update(token).digest("hex");
+}
 
 const RUN_ID = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
 const createdUserIds: number[] = [];
@@ -141,6 +148,181 @@ describe("Elders & circles", () => {
     const list = await app.request("/elders", { headers: { cookie: neighbor.cookie } });
     const circles = (await list.json()) as Array<{ id: string }>;
     expect(circles.some((c) => c.id === elder.id)).toBe(true);
+  });
+});
+
+describe("Password reset", () => {
+  test("requesting a reset creates one pending token for a real account, and re-requesting replaces it", async () => {
+    const account = await signedUpUser(40);
+
+    const first = await app.request("/auth/forgot-password", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: testEmail("u40") }),
+    });
+    expect(first.status).toBe(200);
+
+    const afterFirst = await db.query.passwordResetTokens.findMany({ where: eq(passwordResetTokens.userId, account.userId) });
+    expect(afterFirst.length).toBe(1);
+
+    const second = await app.request("/auth/forgot-password", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: testEmail("u40") }),
+    });
+    expect(second.status).toBe(200);
+
+    const afterSecond = await db.query.passwordResetTokens.findMany({ where: eq(passwordResetTokens.userId, account.userId) });
+    expect(afterSecond.length).toBe(1);
+    expect(afterSecond[0]!.tokenHash).not.toBe(afterFirst[0]!.tokenHash);
+  });
+
+  test("requesting a reset for an unknown email is a no-op, not an error", async () => {
+    const res = await app.request("/auth/forgot-password", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: testEmail("does-not-exist") }),
+    });
+    // Same response either way — the point is a caller can't tell registered emails from
+    // unregistered ones by watching for a different status code.
+    expect(res.status).toBe(200);
+  });
+
+  test("a valid token resets the password, then can't be reused", async () => {
+    const account = await signedUpUser(41, { password: "OldPassword1!" });
+    const rawToken = "test-reset-token-" + RUN_ID;
+    await db.insert(passwordResetTokens).values({
+      userId: account.userId,
+      tokenHash: hashResetToken(rawToken),
+      expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+    });
+
+    const reset = await app.request("/auth/reset-password", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: rawToken, password: "NewPassword1!" }),
+    });
+    expect(reset.status).toBe(200);
+
+    const loginOld = await app.request("/auth/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: testEmail("u41"), password: "OldPassword1!" }),
+    });
+    expect(loginOld.status).toBe(401);
+
+    const loginNew = await app.request("/auth/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: testEmail("u41"), password: "NewPassword1!" }),
+    });
+    expect(loginNew.status).toBe(200);
+
+    // The token was single-use — trying it again should fail now that it's been consumed.
+    const reused = await app.request("/auth/reset-password", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: rawToken, password: "AnotherPassword1!" }),
+    });
+    expect(reused.status).toBe(400);
+  });
+
+  test("an unknown or expired token is rejected", async () => {
+    const garbage = await app.request("/auth/reset-password", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: "not-a-real-token", password: "WhateverPass1!" }),
+    });
+    expect(garbage.status).toBe(400);
+    expect(((await garbage.json()) as { error: { code: string } }).error.code).toBe("invalid_token");
+
+    const account = await signedUpUser(42);
+    const rawToken = "expired-token-" + RUN_ID;
+    await db.insert(passwordResetTokens).values({
+      userId: account.userId,
+      tokenHash: hashResetToken(rawToken),
+      expiresAt: new Date(Date.now() - 1000), // already expired
+    });
+
+    const expired = await app.request("/auth/reset-password", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: rawToken, password: "WhateverPass1!" }),
+    });
+    expect(expired.status).toBe(400);
+  });
+});
+
+describe("Timeline", () => {
+  test("the author can edit their own entry; another member can't", async () => {
+    const family = await signedUpUser(30);
+    const elder = await createElder(family.cookie, 20);
+
+    const posted = await app.request(`/timeline/${elder.id}`, {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: family.cookie },
+      body: JSON.stringify({ body: "Original note" }),
+    });
+    expect(posted.status).toBe(201);
+    const post = (await posted.json()) as { id: string };
+
+    const edited = await app.request(`/timeline/post/${post.id}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json", cookie: family.cookie },
+      body: JSON.stringify({ body: "Corrected note" }),
+    });
+    expect(edited.status).toBe(200);
+    expect(((await edited.json()) as { body: string }).body).toBe("Corrected note");
+
+    const outsider = await signedUpUser(31);
+    const join = await app.request("/elders/join", {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: outsider.cookie },
+      body: JSON.stringify({ inviteCode: elder.inviteCode }),
+    });
+    expect(join.status).toBe(200);
+
+    const blocked = await app.request(`/timeline/post/${post.id}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json", cookie: outsider.cookie },
+      body: JSON.stringify({ body: "Not mine to change" }),
+    });
+    expect(blocked.status).toBe(403);
+  });
+});
+
+describe("Open postings — area matching", () => {
+  test("a posting in the volunteer's own area is flagged and sorted first", async () => {
+    const nearFamily = await signedUpUser(20);
+    const nearElder = await createElder(nearFamily.cookie, 10);
+    const farFamily = await signedUpUser(21);
+    const farElder = await createElder(farFamily.cookie, 11);
+    // createElder always uses area "Test Area" — give the far one a distinct area so only
+    // one of the two postings should match the volunteer's preferred area below.
+    await db.update(elders).set({ area: "Somewhere Else" }).where(eq(elders.id, farElder.id));
+
+    const volunteer = await signedUpUser(22, { wantsToVolunteer: true, preferredArea: "Test Area" });
+
+    await app.request(`/visits/${farElder.id}`, {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: farFamily.cookie },
+      body: JSON.stringify({ scheduledAt: new Date(Date.now() + 86_400_000).toISOString() }),
+    });
+    await app.request(`/visits/${nearElder.id}`, {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: nearFamily.cookie },
+      body: JSON.stringify({ scheduledAt: new Date(Date.now() + 86_400_000).toISOString() }),
+    });
+
+    const res = await app.request("/visits/open", { headers: { cookie: volunteer.cookie } });
+    expect(res.status).toBe(200);
+    const postings = (await res.json()) as Array<{ elderId: string; matchesArea: boolean }>;
+
+    const near = postings.find((p) => p.elderId === nearElder.id);
+    const far = postings.find((p) => p.elderId === farElder.id);
+    expect(near?.matchesArea).toBe(true);
+    expect(far?.matchesArea).toBe(false);
+    expect(postings.indexOf(near!)).toBeLessThan(postings.indexOf(far!));
   });
 });
 

@@ -58,8 +58,11 @@ export function LoginForm({ className }: LoginFormProps) {
         required
       />
 
-      <div className="mb-4.5 mt-1">
+      <div className="mb-4.5 mt-1 flex items-center justify-between">
         <Checkbox label="Remember me" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+        <Link to="/forgot-password" className="text-xs font-semibold text-sage-700 hover:text-sage-500">
+          Forgot password?
+        </Link>
       </div>
 
       {error && <p className="mb-4 text-sm font-medium text-danger-600">{error}</p>}

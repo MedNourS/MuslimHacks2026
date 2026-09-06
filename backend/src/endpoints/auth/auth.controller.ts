@@ -63,6 +63,22 @@ export const logout = defineRoute({}, async (c) => {
   return c.json({ ok: true });
 });
 
+export const forgotPasswordBodySchema = z.object({ email: z.string().email() });
+export const forgotPassword = defineRoute({ body: forgotPasswordBodySchema }, async (c, { body }) => {
+  await service.requestPasswordReset(body.email);
+  // Same response whether or not the account exists — see requestPasswordReset().
+  return c.json({ ok: true });
+});
+
+export const resetPasswordBodySchema = z.object({
+  token: z.string().min(1, "Missing reset token"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+export const resetPassword = defineRoute({ body: resetPasswordBodySchema }, async (c, { body }) => {
+  await service.resetPassword(body.token, body.password);
+  return c.json({ ok: true });
+});
+
 export const updateVolunteerBodySchema = z.object({
   wantsToVolunteer: z.boolean(),
   // Required when turning volunteering on.

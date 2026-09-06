@@ -77,6 +77,18 @@ export const visitStatus = pgEnum("visit_status", [
   "completed",
 ]);
 
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  // The raw token only ever lives in the emailed link — this stores a sha256 hash of it, the
+  // same "never store the secret itself" shape as the password column above.
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const visits = pgTable("visits", {
   id: uuid("id").defaultRandom().primaryKey(),
   elderId: uuid("elder_id")

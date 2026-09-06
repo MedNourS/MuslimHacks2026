@@ -197,6 +197,11 @@ export function VolunteeringSection({ user, onUpdated, className }: Volunteering
                     <p className="text-base font-bold text-ink-900">{posting.elderFirstName}</p>
                     <p className="text-xs text-ink-500">{posting.area}</p>
                   </div>
+                  {posting.matchesArea && (
+                    <span className="shrink-0 rounded-full bg-sage-100 px-2.5 py-1 text-xs font-semibold text-sage-700">
+                      Near you
+                    </span>
+                  )}
                 </div>
                 <p className="mt-2 text-sm text-ink-700">{formatVisitTime(posting.scheduledAt)}</p>
                 {posting.notes && <p className="mt-1 text-sm text-ink-500">{posting.notes}</p>}

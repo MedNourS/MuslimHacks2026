@@ -20,3 +20,15 @@ export const list = defineRoute({ params: paramsSchema }, async (c, { params }) 
   const result = await service.list(authedUserId(c), params.elderId);
   return c.json(result);
 });
+
+export const postParamsSchema = z.object({ postId: z.string().uuid() });
+export const updateBodySchema = z.object({
+  body: z.string().min(1, "Write something first").max(2000, "Keep it under 2000 characters"),
+});
+export const update = defineRoute(
+  { params: postParamsSchema, body: updateBodySchema },
+  async (c, { params, body }) => {
+    const result = await service.update(authedUserId(c), params.postId, body);
+    return c.json(result);
+  }
+);
