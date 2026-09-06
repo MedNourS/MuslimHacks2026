@@ -21,7 +21,7 @@ export interface VolunteeringSectionProps {
   className?: string;
 }
 
-// The "also volunteering" half of the dashboard — sits alongside "Your circles" rather than
+// The "also volunteering" half of the dashboard, sits alongside "Your circles" rather than
 // replacing it, since coordinating your own family's care and volunteering for others are
 // independent choices, not a fork you pick once at signup.
 export function VolunteeringSection({ user, onUpdated, className }: VolunteeringSectionProps) {
@@ -188,7 +188,7 @@ export function VolunteeringSection({ user, onUpdated, className }: Volunteering
 
         <div>
           <h3 className="text-xs font-bold uppercase tracking-wide text-ink-400">Open requests</h3>
-          {open && open.length === 0 && <p className="mt-3 text-sm text-ink-500">No open requests right now — check back soon.</p>}
+          {open && open.length === 0 && <p className="mt-3 text-sm text-ink-500">No open requests right now. Check back soon.</p>}
           <ul className="mt-3 space-y-3">
             {open?.map((posting) => (
               <li key={posting.id} className="rounded-2xl border border-ink-200 bg-white p-5">

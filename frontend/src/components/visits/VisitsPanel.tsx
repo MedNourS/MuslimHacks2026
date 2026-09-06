@@ -15,7 +15,7 @@ export interface VisitsPanelProps {
 
 const STATUS_LABEL: Record<Visit["status"], string> = {
   open: "Waiting for a volunteer",
-  pending_family_confirm: "Volunteer offered — needs your confirmation",
+  pending_family_confirm: "Volunteer offered, needs your confirmation",
   confirmed: "Confirmed",
   cancelled: "Cancelled",
   completed: "Completed",
@@ -113,7 +113,7 @@ export function VisitsPanel({ elderId, role, currentUserId }: VisitsPanelProps) 
 
       {visits && active.length === 0 && (
         <p className="mt-3 text-sm text-ink-500">
-          {isCoordinator ? "No active requests — post one above." : "No visits assigned to you here yet."}
+          {isCoordinator ? "No active requests. Post one above." : "No visits assigned to you here yet."}
         </p>
       )}
 

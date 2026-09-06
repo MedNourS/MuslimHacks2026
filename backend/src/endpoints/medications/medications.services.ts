@@ -32,7 +32,7 @@ export async function list(userId: number, elderId: string) {
     .select()
     .from(medicationSchedules)
     .where(eq(medicationSchedules.elderId, elderId))
-    // Alphabetical on "HH:MM" is chronological — string sort works here without parsing.
+    // Alphabetical on "HH:MM" is chronological, string sort works here without parsing.
     .orderBy(asc(medicationSchedules.timeOfDay));
 }
 

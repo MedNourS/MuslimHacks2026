@@ -1,11 +1,11 @@
-// Synced from the backon backend by `bunx create-fronton sync-api` — do not edit.
+// Synced from the backon backend by `bunx create-fronton sync-api`, do not edit.
 // Re-run that after changing routes in the backend. Committed rather than
 // gitignored on purpose: a deploy builds this project on its own, with no
 // backend checkout next to it to regenerate from.
 //
 // NOTE: the generator misses routes registered with inline middleware (e.g.
 // authApi.updateVolunteer) and collides on repeated schema names like
-// createBodySchema across endpoint modules — both are patched back in by hand
+// createBodySchema across endpoint modules, both are patched back in by hand
 // after every regen. See git history / commit messages for the pattern.
 
 import { resolveApiBaseUrl } from "@mednours/fronton/client";

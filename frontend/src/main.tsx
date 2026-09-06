@@ -7,7 +7,7 @@ import "./index.css";
 function App() {
   const location = useLocation();
   const element = useRoutes(routes);
-  // Keyed by pathname so each real navigation remounts and replays the fade-in — a
+  // Keyed by pathname so each real navigation remounts and replays the fade-in, a
   // query-string-only change (e.g. ?inviteCode=) doesn't retrigger it.
   return (
     <div key={location.pathname} className="page-transition">
@@ -19,7 +19,7 @@ function App() {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      {/* Every route is lazy, so this boundary is required, not optional —
+      {/* Every route is lazy, so this boundary is required, not optional,
           without it React throws the moment a route resolves. null rather
           than a spinner on purpose: chunks this small resolve fast enough
           that a flashed spinner reads as jank. Put a real skeleton here

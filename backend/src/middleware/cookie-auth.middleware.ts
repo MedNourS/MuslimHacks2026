@@ -4,7 +4,7 @@ import { AppError, type BackonContext, type Next } from "@mednours/backon";
 
 // Sessions live in an httpOnly cookie (not localStorage / a Bearer header) so a client-side
 // XSS bug can't read the token off the page. This is a small hand-rolled stand-in for
-// backon's own requireAuth(), which only reads `Authorization: Bearer` — everything else
+// backon's own requireAuth(), which only reads `Authorization: Bearer`, everything else
 // (payload shape, the "auth" context key, the 401 on failure) mirrors it exactly so every
 // existing `c.get("auth")` call site keeps working unchanged.
 export const SESSION_COOKIE = "care_circle_session";

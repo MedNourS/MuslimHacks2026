@@ -11,7 +11,7 @@ export interface PasswordConfirmDialogProps {
 }
 
 // A password re-entry gate for an action that shouldn't happen from a single stray tap. Not a
-// security boundary (the session is already authenticated) — just friction on the way to an
+// security boundary (the session is already authenticated), just friction on the way to an
 // irreversible-feeling action, with a real server-side check behind it (authApi.verifyPassword)
 // rather than just a client-side "are you sure".
 export function PasswordConfirmDialog({ title, description, confirmLabel = "Confirm", onConfirm, onCancel }: PasswordConfirmDialogProps) {

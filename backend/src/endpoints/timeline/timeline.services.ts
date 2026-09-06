@@ -30,7 +30,7 @@ export async function create(userId: number, elderId: string, body: z.infer<type
 export async function update(userId: number, postId: string, body: z.infer<typeof updateBodySchema>) {
   const post = await db.query.timelinePosts.findFirst({ where: eq(timelinePosts.id, postId) });
   if (!post) throw new AppError(404, "not_found", "Entry not found");
-  // Only the person who wrote it can change it — a handoff note is that person's account of
+  // Only the person who wrote it can change it: a handoff note is that person's account of
   // what happened, not something anyone else in the circle should be able to rewrite.
   if (post.authorId !== userId) {
     throw new AppError(403, "forbidden", "Only the author can edit this entry");

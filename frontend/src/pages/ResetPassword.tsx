@@ -24,7 +24,7 @@ export default function ResetPassword() {
       return;
     }
     if (!token) {
-      setError("This reset link is missing its token — request a new one.");
+      setError("This reset link is missing its token. Request a new one.");
       return;
     }
     setSubmitting(true);

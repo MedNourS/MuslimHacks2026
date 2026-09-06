@@ -10,10 +10,10 @@ interface PrayerTime {
   timeOfDay: string; // 24-hour "HH:MM"
 }
 
-// Fard prayers only — Sunrise/Imsak/Midnight aren't things an elder needs a countdown to.
+// Fard prayers only: Sunrise/Imsak/Midnight aren't things an elder needs a countdown to.
 const PRAYER_ORDER = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"] as const;
 
-// Aladhan sometimes returns times like "05:42 (EST)" — keep just the "HH:MM" part.
+// Aladhan sometimes returns times like "05:42 (EST)", keep just the "HH:MM" part.
 function cleanTime(raw: string): string {
   return raw.split(" ")[0];
 }
@@ -53,7 +53,7 @@ export function PrayerTimes({ area }: PrayerTimesProps) {
     return () => clearInterval(timer);
   }, []);
 
-  // Quietly skip the widget if the area can't be geocoded — this is a nice-to-have, not
+  // Quietly skip the widget if the area can't be geocoded, this is a nice-to-have, not
   // something that should ever block or clutter the elder's page with an error.
   if (failed) return null;
 
@@ -70,7 +70,7 @@ export function PrayerTimes({ area }: PrayerTimesProps) {
         <div className="mt-3">
           <p className="text-2xl font-bold text-sage-700">{next.name}</p>
           <p className="mt-1 text-lg text-ink-700">
-            {formatTimeOfDay(next.timeOfDay)} — in {formatMinutesCountdown(next.minutesUntil)}
+            {formatTimeOfDay(next.timeOfDay)} · in {formatMinutesCountdown(next.minutesUntil)}
           </p>
         </div>
       )}

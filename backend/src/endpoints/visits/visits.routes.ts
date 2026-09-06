@@ -7,7 +7,7 @@ export const visitsRoutes = new Hono<Env>();
 
 visitsRoutes.use("*", requireAuthCookie({ secret: jwtSecret() }));
 
-// Static routes first — Hono still matches "/open" correctly against "/:elderId" either way,
+// Static routes first: Hono still matches "/open" correctly against "/:elderId" either way,
 // but keeping literal paths ahead of dynamic ones here for clarity.
 visitsRoutes.get("/open", controller.listOpen);
 visitsRoutes.get("/mine", controller.listMine);

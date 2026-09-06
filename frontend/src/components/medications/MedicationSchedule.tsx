@@ -86,7 +86,7 @@ export function MedicationSchedule({ elderId, editable, large }: MedicationSched
         <div className="mt-3">
           <p className={dueSoon ? "text-2xl font-bold text-danger-600" : "text-2xl font-bold text-sage-700"}>{next.label}</p>
           <p className="mt-1 text-lg text-ink-700">
-            {formatTimeOfDay(next.timeOfDay)} — in {formatMinutesCountdown(next.minutesUntil)}
+            {formatTimeOfDay(next.timeOfDay)} · in {formatMinutesCountdown(next.minutesUntil)}
           </p>
         </div>
       )}

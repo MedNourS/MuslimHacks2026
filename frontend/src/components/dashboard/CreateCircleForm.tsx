@@ -54,7 +54,7 @@ export function CreateCircleForm({ onCreated, className }: CreateCircleFormProps
         placeholder="Verdun, Montreal"
         value={area}
         onChange={(e) => setArea(e.target.value)}
-        helperText="Shown to volunteers browsing requests — never their exact address."
+        helperText="Shown to volunteers browsing requests, never their exact address."
         required
       />
 

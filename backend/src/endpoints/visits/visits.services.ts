@@ -55,7 +55,7 @@ async function toSummary(visit: typeof visits.$inferSelect) {
 }
 
 // Drops the volunteer's standing access to an elder's circle once they have no other active
-// (confirmed) engagement with that elder — keeps "confirmed volunteer sees the real address"
+// (confirmed) engagement with that elder, keeps "confirmed volunteer sees the real address"
 // scoped to the actual engagement instead of lingering forever after one visit.
 async function revokeVolunteerAccessIfDone(elderId: string, volunteerId: number) {
   const stillActive = await db.query.visits.findFirst({
@@ -116,12 +116,12 @@ export async function listOpen(userId: number) {
     .orderBy(desc(visits.createdAt));
 
   // A volunteer only ever sets one coarse area (see signup/updateVolunteer), so this is a
-  // straight string match, not a real distance calculation — that's the honest scope of "area
+  // straight string match, not a real distance calculation, that's the honest scope of "area
   // matching" without geocoding anything. Matches float to the top; within each group, postings
   // stay in the most-recent-first order the query already returned (Array#sort is stable).
   const preferredArea = volunteer.preferredArea?.trim().toLowerCase() || null;
 
-  // First name only, and area instead of address — a browsing volunteer hasn't been matched yet.
+  // First name only, and area instead of address: a browsing volunteer hasn't been matched yet.
   const postings = rows.map((r) => ({
     id: r.id,
     elderId: r.elderId,
@@ -157,7 +157,7 @@ export async function listMine(userId: number) {
     .orderBy(desc(visits.scheduledAt));
 
   // The precise address only ever shows once a claim is actually confirmed (or was, before it
-  // completed) — never while still pending, matching the same rule as everywhere else.
+  // completed), never while still pending, matching the same rule as everywhere else.
   return rows.map((r) => ({
     id: r.id,
     elderId: r.elderId,

@@ -13,7 +13,7 @@ export interface AuthResponse {
 
 const USER_KEY = "care_circle_user";
 
-// The actual credential lives in an httpOnly cookie the backend sets on login/signup — it's
+// The actual credential lives in an httpOnly cookie the backend sets on login/signup, it's
 // never readable from JS, so it can't be stored here. This only ever holds the (non-sensitive)
 // user info the UI displays; it is not the security boundary. That's the cookie, checked
 // server-side on every protected request.

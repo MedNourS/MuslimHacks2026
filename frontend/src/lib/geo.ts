@@ -6,7 +6,7 @@ export function getCurrentPosition(): Promise<{ lat: string; lng: string }> {
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => resolve({ lat: String(pos.coords.latitude), lng: String(pos.coords.longitude) }),
-      () => reject(new Error("Couldn't get your location — check your location permission.")),
+      () => reject(new Error("Couldn't get your location. Check your location permission.")),
       { enableHighAccuracy: true, timeout: 10_000 }
     );
   });

@@ -2,7 +2,7 @@ import type { Next } from "@mednours/backon";
 import type { BackonContext } from "@mednours/backon";
 
 /**
- * Example middleware, just to show the pattern — adds a response-time
+ * Example middleware, just to show the pattern, adds a response-time
  * header. Error handling, request logging, secure headers, CORS, and the
  * request body size limit are already wired into createApp() by backon
  * itself; a separate error.middleware.ts is only needed to override that

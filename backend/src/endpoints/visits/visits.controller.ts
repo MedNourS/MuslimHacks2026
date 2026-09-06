@@ -23,7 +23,7 @@ export const list = defineRoute({ params: paramsSchema }, async (c, { params }) 
   return c.json(result);
 });
 
-// Cross-elder browse for volunteers — every currently-open posting, area-only (never an address).
+// Cross-elder browse for volunteers: every currently-open posting, area-only (never an address).
 export const listOpen = defineRoute({}, async (c) => {
   const result = await service.listOpen(authedUserId(c));
   return c.json(result);

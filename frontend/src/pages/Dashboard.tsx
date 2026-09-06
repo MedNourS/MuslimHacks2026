@@ -29,11 +29,11 @@ export default function Dashboard() {
       .then(setCircles)
       .catch((err) => setError(err instanceof Error ? err.message : "Couldn't load your circles."));
     // `user` is re-parsed from localStorage on every render (new object each time), so it can't
-    // be a dependency here without re-running this effect (and re-fetching) on every render —
+    // be a dependency here without re-running this effect (and re-fetching) on every render,
     // depend on the stable primitive id instead.
   }, [user?.id, navigate]);
 
-  // An elder-only account that isn't also volunteering has exactly one thing to look at — skip
+  // An elder-only account that isn't also volunteering has exactly one thing to look at: skip
   // the dashboard grid entirely and go straight there. (An elder account that also volunteers
   // still lands here, since there's now a second section worth seeing.)
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function Dashboard() {
     try {
       await authApi.logout();
     } catch {
-      // Clear local state regardless — worst case the cookie outlives its expiry on the server.
+      // Clear local state regardless: worst case the cookie outlives its expiry on the server.
     }
     clearSession();
     navigate("/");

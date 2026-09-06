@@ -106,7 +106,7 @@ export async function getById(userId: number, elderId: string) {
     fullName: elder.fullName,
     inviteCode: elder.inviteCode,
     area: elder.area,
-    // Precise address — only ever returned here, gated by the membership check above. Never
+    // Precise address: only ever returned here, gated by the membership check above. Never
     // included in the open-postings browse list (see visits.services.ts listOpen()).
     address: elder.address,
     role: membership.role,

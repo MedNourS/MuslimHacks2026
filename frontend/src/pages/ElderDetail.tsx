@@ -41,7 +41,7 @@ export default function ElderDetail() {
       .then(setCircle)
       .catch((err) => setError(err instanceof Error ? err.message : "Couldn't load this circle."));
     // `user` is re-parsed from localStorage on every render (new object each time), so it can't
-    // be a dependency here without re-running this effect (and re-fetching) on every render —
+    // be a dependency here without re-running this effect (and re-fetching) on every render,
     // depend on the stable primitive id instead.
   }, [id, user?.id, navigate]);
 
@@ -51,14 +51,14 @@ export default function ElderDetail() {
     try {
       await authApi.logout();
     } catch {
-      // Clear local state regardless — worst case the cookie outlives its expiry on the server.
+      // Clear local state regardless: worst case the cookie outlives its expiry on the server.
     }
     clearSession();
     navigate("/");
   }
 
   // Family/volunteer accounts log out immediately. The elder view gates it behind a password
-  // re-entry instead — a stray tap on "Log out" shouldn't lock an elder out of their own care
+  // re-entry instead: a stray tap on "Log out" shouldn't lock an elder out of their own care
   // page, and re-signing up isn't a reasonable recovery path for someone in that position.
   async function handleElderLogoutConfirm(password: string) {
     await authApi.verifyPassword({ password });
@@ -72,7 +72,7 @@ export default function ElderDetail() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard access denied — the code is already visible on screen.
+      // Clipboard access denied, the code is already visible on screen.
     }
   }
 
@@ -88,7 +88,7 @@ export default function ElderDetail() {
     }
   }
 
-  // The elder gets a deliberately minimal, read-mostly view — no posting, no member
+  // The elder gets a deliberately minimal, read-mostly view: no posting, no member
   // management, no circle admin. Just "who's visiting" and the timeline.
   if (circle && circle.role === "elder") {
     return (

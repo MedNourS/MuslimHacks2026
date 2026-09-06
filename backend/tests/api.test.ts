@@ -1,8 +1,8 @@
 // Integration tests for the live API surface. These run against the real database (whatever
-// DATABASE_URL in .env points to) through the actual Hono app — no mocks, no test double for
+// DATABASE_URL in .env points to) through the actual Hono app, no mocks, no test double for
 // Drizzle. Every user/elder a test creates is tracked and deleted in afterAll(), so a full run
 // leaves the database exactly as it found it. If you add a test that creates data, track the
-// id and let the cleanup at the bottom delete it — don't leave rows behind (we've had to do a
+// id and let the cleanup at the bottom delete it, don't leave rows behind (we've had to do a
 // manual cleanup sweep of leftover test accounts before; this file is what replaces that).
 import { describe, test, expect, afterAll } from "bun:test";
 import { createHash } from "node:crypto";
@@ -11,7 +11,7 @@ import { app } from "../src/app";
 import { db } from "../src/config/db";
 import { elders, passwordResetTokens, users } from "../src/config/schema";
 
-// Mirrors the private hashResetToken() in auth.services.ts (sha256 hex) — tests own this token
+// Mirrors the private hashResetToken() in auth.services.ts (sha256 hex), tests own this token
 // directly since the API, correctly, never returns one.
 function hashResetToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
@@ -25,7 +25,7 @@ function testEmail(tag: string) {
   return `test.${RUN_ID}.${tag}@carecircle.test`;
 }
 
-// +1 followed by 9 digits — satisfies the app's phone regex (a leading 1-9 digit, then 7-14
+// +1 followed by 9 digits, satisfies the app's phone regex (a leading 1-9 digit, then 7-14
 // more) while staying unique per test run and per call within a run.
 function testPhone(n: number) {
   const suffix = RUN_ID.slice(-6).padStart(6, "0");
@@ -267,7 +267,7 @@ describe("Password reset", () => {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ email: testEmail("does-not-exist") }),
     });
-    // Same response either way — the point is a caller can't tell registered emails from
+    // Same response either way: the point is a caller can't tell registered emails from
     // unregistered ones by watching for a different status code.
     expect(res.status).toBe(200);
   });
@@ -302,7 +302,7 @@ describe("Password reset", () => {
     });
     expect(loginNew.status).toBe(200);
 
-    // The token was single-use — trying it again should fail now that it's been consumed.
+    // The token was single-use: trying it again should fail now that it's been consumed.
     const reused = await app.request("/auth/reset-password", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -375,13 +375,13 @@ describe("Timeline", () => {
   });
 });
 
-describe("Open postings — area matching", () => {
+describe("Open postings, area matching", () => {
   test("a posting in the volunteer's own area is flagged and sorted first", async () => {
     const nearFamily = await signedUpUser(20);
     const nearElder = await createElder(nearFamily.cookie, 10);
     const farFamily = await signedUpUser(21);
     const farElder = await createElder(farFamily.cookie, 11);
-    // createElder always uses area "Test Area" — give the far one a distinct area so only
+    // createElder always uses area "Test Area", give the far one a distinct area so only
     // one of the two postings should match the volunteer's preferred area below.
     await db.update(elders).set({ area: "Somewhere Else" }).where(eq(elders.id, farElder.id));
 
@@ -473,7 +473,7 @@ describe("Visit lifecycle", () => {
     });
     expect(claimed.status).toBe(200);
 
-    // Still pending_family_confirm — turning volunteering off should be blocked.
+    // Still pending_family_confirm: turning volunteering off should be blocked.
     const blocked = await app.request("/auth/volunteer", {
       method: "PATCH",
       headers: { "content-type": "application/json", cookie: volunteer.cookie },

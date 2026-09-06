@@ -21,7 +21,7 @@ export function SignUpForm({ className }: SignUpFormProps) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
-  // Independent of everything else — coordinating your own family's circle and volunteering
+  // Independent of everything else: coordinating your own family's circle and volunteering
   // for others aren't mutually exclusive, so this is just an opt-in checkbox, not a fork.
   const [wantsToVolunteer, setWantsToVolunteer] = useState(false);
   const [preferredArea, setPreferredArea] = useState("");
@@ -54,7 +54,7 @@ export function SignUpForm({ className }: SignUpFormProps) {
         try {
           await eldersApi.join({ inviteCode, asElder });
         } catch (joinErr) {
-          // Account was created either way — surface the join problem but don't block navigation.
+          // Account was created either way: surface the join problem but don't block navigation.
           setError(joinErr instanceof Error ? joinErr.message : "Couldn't join that circle automatically.");
         }
       }
@@ -71,7 +71,7 @@ export function SignUpForm({ className }: SignUpFormProps) {
     <form onSubmit={handleSubmit} className={clsx("w-full max-w-sm rounded-[20px] border border-black/10 bg-white p-7", className)}>
       <h1 className="text-lg font-extrabold text-ink-900">Create your account</h1>
       <p className="mb-5 text-xs text-ink-500">
-        {inviteCode ? "You've been invited to a care circle." : "Coordinate care for a family member, and volunteer to help others in your community — as much or as little as you want."}
+        {inviteCode ? "You've been invited to a care circle." : "Coordinate care for a family member, and volunteer to help others in your community, as much or as little as you want."}
       </p>
 
       <Field

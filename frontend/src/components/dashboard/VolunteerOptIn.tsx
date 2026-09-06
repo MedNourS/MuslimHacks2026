@@ -34,7 +34,7 @@ export function VolunteerOptIn({ onUpdated, className }: VolunteerOptInProps) {
       <div className="rounded-2xl border border-dashed border-ink-300 bg-white/60 p-6">
         <p className="text-sm font-bold text-ink-900">Want to help other families too?</p>
         <p className="mt-1 text-sm text-ink-500">
-          Turn on volunteering to browse requests from other families nearby and offer to help — alongside your own circle(s) above.
+          Turn on volunteering to browse requests from other families nearby and offer to help, alongside your own circle(s) above.
         </p>
 
         {!open ? (

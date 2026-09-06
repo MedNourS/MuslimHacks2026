@@ -5,7 +5,7 @@ import { sendEmail } from "../../config/email";
 
 // The app's users are Eastern-time (Montreal); the cron itself runs on Vercel's UTC clock,
 // so "today" has to be computed in the household's zone or evening visits (after ~8pm ET)
-// land in tomorrow's UTC date and get reported a day late — after they already happened.
+// land in tomorrow's UTC date and get reported a day late, after they already happened.
 const DIGEST_TIME_ZONE = "America/Toronto";
 
 function zonedOffsetMs(utcMs: number, timeZone: string): number {
@@ -94,7 +94,7 @@ export async function runVisitDigest() {
           minute: "2-digit",
           timeZone: DIGEST_TIME_ZONE,
         });
-        return `<li><strong>${v.visitorName}</strong> around ${time}${v.notes ? ` — ${v.notes}` : ""}</li>`;
+        return `<li><strong>${v.visitorName}</strong> around ${time}${v.notes ? `: ${v.notes}` : ""}</li>`;
       })
       .join("");
 

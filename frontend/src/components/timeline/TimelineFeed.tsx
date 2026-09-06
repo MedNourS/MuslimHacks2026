@@ -80,7 +80,7 @@ export function TimelineFeed({ elderId, readOnly, large }: TimelineFeedProps) {
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder="Share an update — a visit, a doctor's note, how today went…"
+            placeholder="Share an update: a visit, a doctor's note, how today went…"
             rows={3}
             maxLength={2000}
             className="w-full rounded-lg border-1.5 border-ink-200 px-3.5 py-3 text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-400 focus:border-sage-500 focus:ring-3 focus:ring-sage-100"

@@ -102,12 +102,12 @@ function hashResetToken(token: string) {
 }
 
 function frontendUrl() {
-  // No FRONTEND_URL in .env at the moment — this is the one deployed frontend, so it's a safe
+  // No FRONTEND_URL in .env at the moment: this is the one deployed frontend, so it's a safe
   // default rather than a config gap. Override locally if you ever need to test against dev.
   return process.env.FRONTEND_URL || "https://care-circle.nour-sabir.dev";
 }
 
-// Deliberately the same outcome whether or not the email belongs to an account — the caller
+// Deliberately the same outcome whether or not the email belongs to an account: the caller
 // (see auth.controller.ts) always returns a generic "check your email" response either way, so
 // this can't be used to find out which emails are registered.
 export async function requestPasswordReset(email: string) {
@@ -118,7 +118,7 @@ export async function requestPasswordReset(email: string) {
   const tokenHash = hashResetToken(token);
   const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
 
-  // One live link per account — a new request invalidates any earlier one.
+  // One live link per account: a new request invalidates any earlier one.
   await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, user.id));
   await db.insert(passwordResetTokens).values({ userId: user.id, tokenHash, expiresAt });
 
@@ -128,7 +128,7 @@ export async function requestPasswordReset(email: string) {
     "Reset your Care Circle password",
     `<p>Someone asked to reset the password on this Care Circle account.</p>` +
       `<p><a href="${resetUrl}">Set a new password</a></p>` +
-      `<p>This link expires in 30 minutes. If this wasn't you, you can ignore this email — your password hasn't changed.</p>`
+      `<p>This link expires in 30 minutes. If this wasn't you, you can ignore this email. Your password hasn't changed.</p>`
   );
 }
 
@@ -141,7 +141,7 @@ export async function resetPassword(token: string, newPassword: string) {
 
   const passwordHash = await password.hash(newPassword);
   await db.update(users).set({ password: passwordHash }).where(eq(users.id, record.userId));
-  // Delete every token for this user, not just the one used — a second unused link from an
+  // Delete every token for this user, not just the one used: a second unused link from an
   // earlier request shouldn't still work after the password has already changed.
   await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, record.userId));
 }

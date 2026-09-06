@@ -14,7 +14,7 @@ export default function ForgotPassword() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      // The API returns the same { ok: true } whether or not the email is registered — that's
+      // The API returns the same { ok: true } whether or not the email is registered, that's
       // on purpose (see backend/src/endpoints/auth/auth.services.ts), so there's nothing to
       // branch on here either. One outcome, always.
       await authApi.forgotPassword({ email });
