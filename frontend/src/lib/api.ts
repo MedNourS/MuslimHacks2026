@@ -6,7 +6,6 @@
 import { resolveApiBaseUrl } from "@mednours/fronton/client";
 
 import type { z } from "zod";
-import type { createBodySchema, updateBodySchema } from "../../../backend/src/endpoints/users/users.controller";
 import type { signupBodySchema, loginBodySchema, updateVolunteerBodySchema } from "../../../backend/src/endpoints/auth/auth.controller";
 import type { createBodySchema as eldersCreateBodySchema, joinBodySchema } from "../../../backend/src/endpoints/elders/elders.controller";
 import type { createBodySchema as timelineCreateBodySchema } from "../../../backend/src/endpoints/timeline/timeline.controller";
@@ -26,14 +25,6 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
   return res.json() as Promise<T>;
 }
-
-export const usersApi = {
-  list: <T = unknown>() => request<T>("/users"),
-  create: <T = unknown>(body: z.infer<typeof createBodySchema>) => request<T>("/users", { method: "POST", body: JSON.stringify(body) }),
-  getById: <T = unknown>(id: string) => request<T>("/users/" + id),
-  update: <T = unknown>(id: string, body: z.infer<typeof updateBodySchema>) => request<T>("/users/" + id, { method: "PUT", body: JSON.stringify(body) }),
-  remove: <T = unknown>(id: string) => request<T>("/users/" + id, { method: "DELETE" }),
-};
 
 export const authApi = {
   signup: <T = unknown>(body: z.infer<typeof signupBodySchema>) => request<T>("/auth/signup", { method: "POST", body: JSON.stringify(body) }),

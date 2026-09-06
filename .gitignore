@@ -1,13 +1,1 @@
 node_modules
-
-# Scratch files from a live smoke-test pass — harmless, safe to delete manually.
-backend/check_roles.ts
-backend/verify_migration.ts
-frontend/dist_stale_*/
-backend/check_test_data_scratch.ts
-frontend/src/components/dashboard/VolunteerDashboard.tsx
-backend/check_schema_scratch.ts
-backend/test_extensive_scratch.ts
-backend/inventory_scratch.ts
-backend/check_primary_contacts_scratch.ts
-backend/cleanup_scratch.ts
