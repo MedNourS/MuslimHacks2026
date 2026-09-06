@@ -8,6 +8,7 @@ import { Button } from "../components/shared/Button";
 import { TimelineFeed } from "../components/timeline/TimelineFeed";
 import { VisitsPanel } from "../components/visits/VisitsPanel";
 import { ElderSimpleView } from "../components/elder/ElderSimpleView";
+import { MedicationSchedule } from "../components/medications/MedicationSchedule";
 
 const ROLE_LABEL: Record<CircleDetail["role"], string> = {
   family: "Family",
@@ -73,7 +74,7 @@ export default function ElderDetail() {
     return (
       <div className="min-h-screen bg-sand-100">
         <AppHeader />
-        <ElderSimpleView elderId={circle.id} fullName={circle.fullName} />
+        <ElderSimpleView elderId={circle.id} fullName={circle.fullName} area={circle.area} />
       </div>
     );
   }
@@ -133,6 +134,8 @@ export default function ElderDetail() {
                     </div>
                   </div>
                 )}
+
+                <MedicationSchedule elderId={circle.id} editable={circle.role !== "volunteer"} />
 
                 <div className="rounded-2xl border border-black/10 bg-white p-6">
                   <h2 className="text-sm font-bold text-ink-900">

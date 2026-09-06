@@ -77,6 +77,20 @@ export const visitStatus = pgEnum("visit_status", [
   "completed",
 ]);
 
+export const medicationSchedules = pgTable("medication_schedules", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  elderId: uuid("elder_id")
+    .notNull()
+    .references(() => elders.id, { onDelete: "cascade" }),
+  // What it is, in the family's own words ("Blood pressure pill", "Insulin") — not a drug
+  // database lookup, just a label.
+  label: text("label").notNull(),
+  // 24-hour "HH:MM", local to the elder — there's no per-elder timezone in this schema (single
+  // deployment, one region), so this is displayed as-entered rather than converted.
+  timeOfDay: text("time_of_day").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const passwordResetTokens = pgTable("password_reset_tokens", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: integer("user_id")

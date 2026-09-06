@@ -3,13 +3,16 @@ import { visitsApi } from "../../lib/api";
 import type { Visit } from "../../lib/visits";
 import { formatVisitTime } from "../../lib/time";
 import { TimelineFeed } from "../timeline/TimelineFeed";
+import { MedicationSchedule } from "../medications/MedicationSchedule";
+import { PrayerTimes } from "./PrayerTimes";
 
 export interface ElderSimpleViewProps {
   elderId: string;
   fullName: string;
+  area: string;
 }
 
-export function ElderSimpleView({ elderId, fullName }: ElderSimpleViewProps) {
+export function ElderSimpleView({ elderId, fullName, area }: ElderSimpleViewProps) {
   const [nextVisit, setNextVisit] = useState<Visit | null | undefined>(undefined);
 
   useEffect(() => {
@@ -39,6 +42,10 @@ export function ElderSimpleView({ elderId, fullName }: ElderSimpleViewProps) {
           </div>
         )}
       </div>
+
+      <MedicationSchedule elderId={elderId} large />
+
+      <PrayerTimes area={area} />
 
       <TimelineFeed elderId={elderId} readOnly large />
     </main>

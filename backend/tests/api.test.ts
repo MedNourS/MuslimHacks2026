@@ -151,6 +151,61 @@ describe("Elders & circles", () => {
   });
 });
 
+describe("Medication schedule", () => {
+  test("a member can add, list (sorted by time), and remove a schedule entry; a non-member can't touch it", async () => {
+    const family = await signedUpUser(50);
+    const elder = await createElder(family.cookie, 30);
+
+    const evening = await app.request(`/medications/${elder.id}`, {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: family.cookie },
+      body: JSON.stringify({ label: "Evening blood pressure pill", timeOfDay: "19:30" }),
+    });
+    expect(evening.status).toBe(201);
+
+    const morning = await app.request(`/medications/${elder.id}`, {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: family.cookie },
+      body: JSON.stringify({ label: "Morning insulin", timeOfDay: "08:00" }),
+    });
+    expect(morning.status).toBe(201);
+    const morningRow = (await morning.json()) as { id: string };
+
+    const rejected = await app.request(`/medications/${elder.id}`, {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: family.cookie },
+      body: JSON.stringify({ label: "Bad time", timeOfDay: "25:99" }),
+    });
+    expect(rejected.status).toBe(400);
+
+    const listed = await app.request(`/medications/${elder.id}`, { headers: { cookie: family.cookie } });
+    expect(listed.status).toBe(200);
+    const rows = (await listed.json()) as Array<{ label: string; timeOfDay: string }>;
+    expect(rows.map((r) => r.timeOfDay)).toEqual(["08:00", "19:30"]);
+
+    const outsider = await signedUpUser(51);
+    const blockedList = await app.request(`/medications/${elder.id}`, { headers: { cookie: outsider.cookie } });
+    expect(blockedList.status).toBe(404);
+
+    const blockedDelete = await app.request(`/medications/${morningRow.id}`, {
+      method: "DELETE",
+      headers: { cookie: outsider.cookie },
+    });
+    expect(blockedDelete.status).toBe(404);
+
+    const removed = await app.request(`/medications/${morningRow.id}`, {
+      method: "DELETE",
+      headers: { cookie: family.cookie },
+    });
+    expect(removed.status).toBe(200);
+
+    const afterRemoval = await app.request(`/medications/${elder.id}`, { headers: { cookie: family.cookie } });
+    const remaining = (await afterRemoval.json()) as Array<{ label: string }>;
+    expect(remaining.length).toBe(1);
+    expect(remaining[0]!.label).toBe("Evening blood pressure pill");
+  });
+});
+
 describe("Password reset", () => {
   test("requesting a reset creates one pending token for a real account, and re-requesting replaces it", async () => {
     const account = await signedUpUser(40);

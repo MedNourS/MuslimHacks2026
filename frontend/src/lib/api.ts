@@ -15,6 +15,7 @@ import type { signupBodySchema, loginBodySchema, forgotPasswordBodySchema, reset
 import type { createBodySchema as eldersCreateBodySchema, joinBodySchema } from "../../../backend/src/endpoints/elders/elders.controller";
 import type { createBodySchema as timelineCreateBodySchema, updateBodySchema as timelineUpdateBodySchema } from "../../../backend/src/endpoints/timeline/timeline.controller";
 import type { createBodySchema as visitsCreateBodySchema, geoBodySchema as visitsGeoBodySchema } from "../../../backend/src/endpoints/visits/visits.controller";
+import type { createBodySchema as medicationsCreateBodySchema } from "../../../backend/src/endpoints/medications/medications.controller";
 
 const BASE_URL = resolveApiBaseUrl() || (import.meta.env.DEV ? "/api" : "");
 
@@ -63,6 +64,12 @@ export const visitsApi = {
   cancel: <T = unknown>(visitId: string) => request<T>("/visits/" + visitId + "/cancel", { method: "POST" }),
   checkIn: <T = unknown>(visitId: string, body: z.infer<typeof visitsGeoBodySchema>) => request<T>("/visits/" + visitId + "/check-in", { method: "POST", body: JSON.stringify(body) }),
   checkOut: <T = unknown>(visitId: string, body: z.infer<typeof visitsGeoBodySchema>) => request<T>("/visits/" + visitId + "/check-out", { method: "POST", body: JSON.stringify(body) }),
+};
+
+export const medicationsApi = {
+  create: <T = unknown>(elderId: string, body: z.infer<typeof medicationsCreateBodySchema>) => request<T>("/medications/" + elderId, { method: "POST", body: JSON.stringify(body) }),
+  list: <T = unknown>(elderId: string) => request<T>("/medications/" + elderId),
+  remove: <T = unknown>(id: string) => request<T>("/medications/" + id, { method: "DELETE" }),
 };
 
 export const cronApi = {
