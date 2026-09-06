@@ -22,3 +22,9 @@ authRoutes.post("/forgot-password", controller.forgotPassword);
 authRoutes.post("/reset-password", controller.resetPassword);
 
 authRoutes.patch("/volunteer", requireAuthCookie({ secret: jwtSecret() }), controller.updateVolunteer);
+
+// Same reasoning as /login — a password-guessing target, just against an already-authenticated
+// session instead of an email. Used to gate the elder view's logout behind a password so a
+// stray tap can't lock an elder out of their own care page.
+authRoutes.use("/verify-password", rateLimit({ windowMs: 60_000, max: 10 }));
+authRoutes.post("/verify-password", requireAuthCookie({ secret: jwtSecret() }), controller.verifyPassword);

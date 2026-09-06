@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { Link, Navigate } from "react-router";
 import { getSessionUser } from "../lib/session";
 import heroWebp from "../assets/hero-elder-care.webp";
@@ -130,10 +131,10 @@ export default function Home() {
             parent controls, not a one-size-fits-all setting.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/signup" className={buttonStyles("primary", "lg")}>
+            <Link to="/signup" className={clsx(buttonStyles("primary", "lg"), "border-2 border-sage-700")}>
               Get started
             </Link>
-            <Link to="/login" className={buttonStyles("secondary", "lg")}>
+            <Link to="/login" className={clsx(buttonStyles("secondary", "lg"), "border-2 border-sage-700")}>
               Log in
             </Link>
           </div>

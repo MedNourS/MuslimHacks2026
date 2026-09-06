@@ -79,6 +79,13 @@ export const resetPassword = defineRoute({ body: resetPasswordBodySchema }, asyn
   return c.json({ ok: true });
 });
 
+export const verifyPasswordBodySchema = z.object({ password: z.string().min(1, "Password is required") });
+export const verifyPassword = defineRoute({ body: verifyPasswordBodySchema }, async (c, { body }) => {
+  const userId = Number(c.get("auth")?.sub);
+  await service.verifyPassword(userId, body.password);
+  return c.json({ ok: true });
+});
+
 export const updateVolunteerBodySchema = z.object({
   wantsToVolunteer: z.boolean(),
   // Required when turning volunteering on.

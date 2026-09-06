@@ -146,6 +146,14 @@ export async function resetPassword(token: string, newPassword: string) {
   await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, record.userId));
 }
 
+export async function verifyPassword(userId: number, candidatePassword: string) {
+  const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
+  if (!user) throw new AppError(401, "invalid_credentials", "That password didn't match");
+
+  const valid = await password.verify(candidatePassword, user.password);
+  if (!valid) throw new AppError(401, "invalid_credentials", "That password didn't match");
+}
+
 export async function updateVolunteer(userId: number, body: z.infer<typeof updateVolunteerBodySchema>) {
   if (body.wantsToVolunteer && !body.preferredArea) {
     throw new AppError(400, "validation_error", "Add an area you're willing to help in");

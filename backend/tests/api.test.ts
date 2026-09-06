@@ -129,6 +129,35 @@ describe("Auth", () => {
     const body = (await bad.json()) as { error: { code: string } };
     expect(body.error.code).toBe("invalid_credentials");
   });
+
+  test("verify-password confirms the right password, rejects the wrong one, and requires auth", async () => {
+    const account = await signedUpUser(60, { password: "GateKeeper1!" });
+
+    const anonymous = await app.request("/auth/verify-password", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ password: "GateKeeper1!" }),
+    });
+    expect(anonymous.status).toBe(401);
+
+    const wrong = await app.request("/auth/verify-password", {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: account.cookie },
+      body: JSON.stringify({ password: "NotIt1!" }),
+    });
+    expect(wrong.status).toBe(401);
+    const wrongBody = (await wrong.json()) as { error: { code: string } };
+    expect(wrongBody.error.code).toBe("invalid_credentials");
+
+    const right = await app.request("/auth/verify-password", {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: account.cookie },
+      body: JSON.stringify({ password: "GateKeeper1!" }),
+    });
+    expect(right.status).toBe(200);
+    const rightBody = (await right.json()) as { ok: boolean };
+    expect(rightBody.ok).toBe(true);
+  });
 });
 
 describe("Elders & circles", () => {

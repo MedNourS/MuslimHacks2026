@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { eldersApi } from "../lib/api";
+import { authApi, eldersApi } from "../lib/api";
 import type { CircleDetail } from "../lib/circles";
-import { getSessionUser } from "../lib/session";
+import { clearSession, getSessionUser } from "../lib/session";
 import { AppHeader } from "../components/shared/AppHeader";
 import { Button } from "../components/shared/Button";
 import { TimelineFeed } from "../components/timeline/TimelineFeed";
 import { VisitsPanel } from "../components/visits/VisitsPanel";
 import { ElderSimpleView } from "../components/elder/ElderSimpleView";
 import { MedicationSchedule } from "../components/medications/MedicationSchedule";
+import { PasswordConfirmDialog } from "../components/shared/PasswordConfirmDialog";
 
 const ROLE_LABEL: Record<CircleDetail["role"], string> = {
   family: "Family",
@@ -26,6 +27,7 @@ export default function ElderDetail() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [elderLinkCopied, setElderLinkCopied] = useState(false);
+  const [confirmingElderLogout, setConfirmingElderLogout] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -44,6 +46,24 @@ export default function ElderDetail() {
   }, [id, user?.id, navigate]);
 
   if (!user) return null;
+
+  async function performLogout() {
+    try {
+      await authApi.logout();
+    } catch {
+      // Clear local state regardless — worst case the cookie outlives its expiry on the server.
+    }
+    clearSession();
+    navigate("/");
+  }
+
+  // Family/volunteer accounts log out immediately. The elder view gates it behind a password
+  // re-entry instead — a stray tap on "Log out" shouldn't lock an elder out of their own care
+  // page, and re-signing up isn't a reasonable recovery path for someone in that position.
+  async function handleElderLogoutConfirm(password: string) {
+    await authApi.verifyPassword({ password });
+    await performLogout();
+  }
 
   async function handleCopy() {
     if (!circle) return;
@@ -73,15 +93,25 @@ export default function ElderDetail() {
   if (circle && circle.role === "elder") {
     return (
       <div className="min-h-screen bg-sand-100">
-        <AppHeader />
+        <AppHeader onLogOut={() => setConfirmingElderLogout(true)} />
         <ElderSimpleView elderId={circle.id} fullName={circle.fullName} area={circle.area} />
+
+        {confirmingElderLogout && (
+          <PasswordConfirmDialog
+            title="Enter your password to log out"
+            description="Just making sure this wasn't an accidental tap."
+            confirmLabel="Log out"
+            onConfirm={handleElderLogoutConfirm}
+            onCancel={() => setConfirmingElderLogout(false)}
+          />
+        )}
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-sand-100">
-      <AppHeader />
+      <AppHeader onLogOut={performLogout} />
 
       <main className="mx-auto max-w-6xl px-6 py-6">
         <Link to="/dashboard" className="text-sm font-semibold text-sage-700 hover:text-sage-500">

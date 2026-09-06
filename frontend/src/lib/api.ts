@@ -11,7 +11,7 @@
 import { resolveApiBaseUrl } from "@mednours/fronton/client";
 
 import type { z } from "zod";
-import type { signupBodySchema, loginBodySchema, forgotPasswordBodySchema, resetPasswordBodySchema, updateVolunteerBodySchema } from "../../../backend/src/endpoints/auth/auth.controller";
+import type { signupBodySchema, loginBodySchema, forgotPasswordBodySchema, resetPasswordBodySchema, updateVolunteerBodySchema, verifyPasswordBodySchema } from "../../../backend/src/endpoints/auth/auth.controller";
 import type { createBodySchema as eldersCreateBodySchema, joinBodySchema } from "../../../backend/src/endpoints/elders/elders.controller";
 import type { createBodySchema as timelineCreateBodySchema, updateBodySchema as timelineUpdateBodySchema } from "../../../backend/src/endpoints/timeline/timeline.controller";
 import type { createBodySchema as visitsCreateBodySchema, geoBodySchema as visitsGeoBodySchema } from "../../../backend/src/endpoints/visits/visits.controller";
@@ -38,6 +38,7 @@ export const authApi = {
   forgotPassword: <T = unknown>(body: z.infer<typeof forgotPasswordBodySchema>) => request<T>("/auth/forgot-password", { method: "POST", body: JSON.stringify(body) }),
   resetPassword: <T = unknown>(body: z.infer<typeof resetPasswordBodySchema>) => request<T>("/auth/reset-password", { method: "POST", body: JSON.stringify(body) }),
   updateVolunteer: <T = unknown>(body: z.infer<typeof updateVolunteerBodySchema>) => request<T>("/auth/volunteer", { method: "PATCH", body: JSON.stringify(body) }),
+  verifyPassword: <T = unknown>(body: z.infer<typeof verifyPasswordBodySchema>) => request<T>("/auth/verify-password", { method: "POST", body: JSON.stringify(body) }),
 };
 
 export const eldersApi = {
