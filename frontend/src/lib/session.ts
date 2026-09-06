@@ -3,7 +3,7 @@ export interface SessionUser {
   name: string;
   email: string;
   phoneNumber: string;
-  accountType: "family" | "volunteer";
+  wantsToVolunteer: boolean;
   preferredArea: string | null;
 }
 

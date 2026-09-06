@@ -7,7 +7,7 @@ import { resolveApiBaseUrl } from "@mednours/fronton/client";
 
 import type { z } from "zod";
 import type { createBodySchema, updateBodySchema } from "../../../backend/src/endpoints/users/users.controller";
-import type { signupBodySchema, loginBodySchema } from "../../../backend/src/endpoints/auth/auth.controller";
+import type { signupBodySchema, loginBodySchema, updateVolunteerBodySchema } from "../../../backend/src/endpoints/auth/auth.controller";
 import type { createBodySchema as eldersCreateBodySchema, joinBodySchema } from "../../../backend/src/endpoints/elders/elders.controller";
 import type { createBodySchema as timelineCreateBodySchema } from "../../../backend/src/endpoints/timeline/timeline.controller";
 import type { createBodySchema as visitsCreateBodySchema, geoBodySchema as visitsGeoBodySchema } from "../../../backend/src/endpoints/visits/visits.controller";
@@ -39,6 +39,8 @@ export const authApi = {
   signup: <T = unknown>(body: z.infer<typeof signupBodySchema>) => request<T>("/auth/signup", { method: "POST", body: JSON.stringify(body) }),
   login: <T = unknown>(body: z.infer<typeof loginBodySchema>) => request<T>("/auth/login", { method: "POST", body: JSON.stringify(body) }),
   logout: <T = unknown>() => request<T>("/auth/logout", { method: "POST" }),
+  updateVolunteer: <T = unknown>(body: z.infer<typeof updateVolunteerBodySchema>) =>
+    request<T>("/auth/volunteer", { method: "PATCH", body: JSON.stringify(body) }),
 };
 
 export const eldersApi = {
@@ -62,8 +64,10 @@ export const visitsApi = {
   confirm: <T = unknown>(visitId: string) => request<T>("/visits/" + visitId + "/confirm", { method: "POST" }),
   decline: <T = unknown>(visitId: string) => request<T>("/visits/" + visitId + "/decline", { method: "POST" }),
   cancel: <T = unknown>(visitId: string) => request<T>("/visits/" + visitId + "/cancel", { method: "POST" }),
-  checkIn: <T = unknown>(visitId: string, body: z.infer<typeof visitsGeoBodySchema>) => request<T>("/visits/" + visitId + "/check-in", { method: "POST", body: JSON.stringify(body) }),
-  checkOut: <T = unknown>(visitId: string, body: z.infer<typeof visitsGeoBodySchema>) => request<T>("/visits/" + visitId + "/check-out", { method: "POST", body: JSON.stringify(body) }),
+  checkIn: <T = unknown>(visitId: string, body: z.infer<typeof visitsGeoBodySchema>) =>
+    request<T>("/visits/" + visitId + "/check-in", { method: "POST", body: JSON.stringify(body) }),
+  checkOut: <T = unknown>(visitId: string, body: z.infer<typeof visitsGeoBodySchema>) =>
+    request<T>("/visits/" + visitId + "/check-out", { method: "POST", body: JSON.stringify(body) }),
 };
 
 export const cronApi = {

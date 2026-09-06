@@ -1,11 +1,19 @@
 import { StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, useRoutes } from "react-router";
+import { BrowserRouter, useLocation, useRoutes } from "react-router";
 import { routes } from "./routes";
 import "./index.css";
 
 function App() {
-  return useRoutes(routes);
+  const location = useLocation();
+  const element = useRoutes(routes);
+  // Keyed by pathname so each real navigation remounts and replays the fade-in — a
+  // query-string-only change (e.g. ?inviteCode=) doesn't retrigger it.
+  return (
+    <div key={location.pathname} className="page-transition">
+      {element}
+    </div>
+  );
 }
 
 createRoot(document.getElementById("root")!).render(

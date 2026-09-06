@@ -82,7 +82,7 @@ export default function ElderDetail() {
     <div className="min-h-screen bg-sand-100">
       <AppHeader />
 
-      <main className="mx-auto max-w-3xl px-6 py-6">
+      <main className="mx-auto max-w-6xl px-6 py-6">
         <Link to="/dashboard" className="text-sm font-semibold text-sage-700 hover:text-sage-500">
           ← Back to your circles
         </Link>
@@ -103,56 +103,62 @@ export default function ElderDetail() {
               </div>
             </div>
 
-            {(circle.role === "family" || circle.role === "elder") && (
-              <div className="mt-6 rounded-2xl border border-black/10 bg-white p-6">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-bold text-ink-900">Invite code</p>
-                    <p className="mt-1 font-mono text-lg font-semibold tracking-wider text-ink-900">{circle.inviteCode}</p>
-                  </div>
-                  <Button variant="secondary" onClick={handleCopy}>
-                    {copied ? "Copied" : "Copy"}
-                  </Button>
-                </div>
-                <p className="mt-3 text-xs text-ink-500">Share this code with anyone who should join {circle.fullName}'s circle.</p>
-              </div>
-            )}
-
-            {circle.role === "family" && !circle.members.some((m) => m.role === "elder") && (
-              <div className="mt-6 rounded-2xl border border-black/10 bg-white p-6">
-                <p className="text-sm font-bold text-ink-900">Invite {circle.fullName} to their own account</p>
-                <p className="mt-1 text-xs text-ink-500">
-                  Send this link so {circle.fullName.split(" ")[0]} can sign up and see their own circle.
-                </p>
-                <div className="mt-3 flex items-center gap-2">
-                  <Button variant="secondary" onClick={handleCopyElderLink}>
-                    {elderLinkCopied ? "Copied" : "Copy signup link"}
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            <div className="mt-6 rounded-2xl border border-black/10 bg-white p-6">
-              <h2 className="text-sm font-bold text-ink-900">
-                Circle members ({circle.members.length})
-              </h2>
-              <ul className="mt-4 divide-y divide-black/5">
-                {circle.members.map((member) => (
-                  <li key={member.userId} className="flex items-center justify-between gap-3 py-3">
-                    <div>
-                      <p className="text-sm font-semibold text-ink-900">{member.name}</p>
-                      <p className="text-xs text-ink-500">{member.email}</p>
+            <div className="mt-6 grid gap-6 lg:grid-cols-3 lg:items-start">
+              <div className="space-y-6 lg:col-span-1">
+                {(circle.role === "family" || circle.role === "elder") && (
+                  <div className="rounded-2xl border border-black/10 bg-white p-6">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-bold text-ink-900">Invite code</p>
+                        <p className="mt-1 font-mono text-lg font-semibold tracking-wider text-ink-900">{circle.inviteCode}</p>
+                      </div>
+                      <Button variant="secondary" onClick={handleCopy}>
+                        {copied ? "Copied" : "Copy"}
+                      </Button>
                     </div>
-                    <span className="rounded-full bg-sand-100 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-sage-700">
-                      {ROLE_LABEL[member.role]}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                    <p className="mt-3 text-xs text-ink-500">Share this code with anyone who should join {circle.fullName}'s circle.</p>
+                  </div>
+                )}
 
-            <VisitsPanel elderId={circle.id} role={circle.role} currentUserId={user.id} />
-            <TimelineFeed elderId={circle.id} />
+                {circle.role === "family" && !circle.members.some((m) => m.role === "elder") && (
+                  <div className="rounded-2xl border border-black/10 bg-white p-6">
+                    <p className="text-sm font-bold text-ink-900">Invite {circle.fullName} to their own account</p>
+                    <p className="mt-1 text-xs text-ink-500">
+                      Send this link so {circle.fullName.split(" ")[0]} can sign up and see their own circle.
+                    </p>
+                    <div className="mt-3 flex items-center gap-2">
+                      <Button variant="secondary" onClick={handleCopyElderLink}>
+                        {elderLinkCopied ? "Copied" : "Copy signup link"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="rounded-2xl border border-black/10 bg-white p-6">
+                  <h2 className="text-sm font-bold text-ink-900">
+                    Circle members ({circle.members.length})
+                  </h2>
+                  <ul className="mt-4 divide-y divide-black/5">
+                    {circle.members.map((member) => (
+                      <li key={member.userId} className="flex items-center justify-between gap-3 py-3">
+                        <div>
+                          <p className="text-sm font-semibold text-ink-900">{member.name}</p>
+                          <p className="text-xs text-ink-500">{member.email}</p>
+                        </div>
+                        <span className="rounded-full bg-sand-100 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-sage-700">
+                          {ROLE_LABEL[member.role]}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="space-y-6 lg:col-span-2">
+                <VisitsPanel elderId={circle.id} role={circle.role} currentUserId={user.id} />
+                <TimelineFeed elderId={circle.id} />
+              </div>
+            </div>
           </>
         )}
       </main>

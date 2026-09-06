@@ -1,4 +1,6 @@
 import { Hono, rateLimit, type Env } from "@mednours/backon";
+import { requireAuthCookie } from "../../middleware/cookie-auth.middleware";
+import { jwtSecret } from "./auth.services";
 import * as controller from "./auth.controller";
 
 export const authRoutes = new Hono<Env>();
@@ -12,3 +14,5 @@ authRoutes.post("/signup", controller.signup);
 authRoutes.post("/login", controller.login);
 
 authRoutes.post("/logout", controller.logout);
+
+authRoutes.patch("/volunteer", requireAuthCookie({ secret: jwtSecret() }), controller.updateVolunteer);

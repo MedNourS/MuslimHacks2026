@@ -43,6 +43,13 @@
       "when": 1788664363764,
       "tag": "0005_good_steel_serpent",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788667383595,
+      "tag": "0006_faulty_quasimodo",
+      "breakpoints": true
     }
   ]
 }

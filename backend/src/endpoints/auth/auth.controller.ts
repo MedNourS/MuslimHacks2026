@@ -36,8 +36,10 @@ export const signupBodySchema = z.object({
     .transform((val) => normalizePhoneNumber(val))
     .refine((val) => PHONE_REGEX.test(val), "Enter a valid phone number, e.g. +15145550123"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  accountType: z.enum(["family", "volunteer"]).optional(),
-  // Volunteers only — a coarse area they're willing to help in, e.g. "Verdun, Montreal".
+  // Optional add-on, not exclusive with anything else — you can create/join your own
+  // circle(s) AND volunteer for others at the same time.
+  wantsToVolunteer: z.boolean().optional(),
+  // Required when wantsToVolunteer is true — a coarse area they're willing to help in.
   preferredArea: z.string().min(1).optional(),
 });
 export const signup = defineRoute({ body: signupBodySchema }, async (c, { body }) => {
@@ -59,4 +61,15 @@ export const login = defineRoute({ body: loginBodySchema }, async (c, { body }) 
 export const logout = defineRoute({}, async (c) => {
   deleteCookie(c, SESSION_COOKIE, { path: "/" });
   return c.json({ ok: true });
+});
+
+export const updateVolunteerBodySchema = z.object({
+  wantsToVolunteer: z.boolean(),
+  // Required when turning volunteering on.
+  preferredArea: z.string().min(1).optional(),
+});
+export const updateVolunteer = defineRoute({ body: updateVolunteerBodySchema }, async (c, { body }) => {
+  const userId = Number(c.get("auth")?.sub);
+  const user = await service.updateVolunteer(userId, body);
+  return c.json({ user });
 });

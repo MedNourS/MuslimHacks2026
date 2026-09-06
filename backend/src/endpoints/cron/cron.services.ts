@@ -8,7 +8,7 @@ import { sendEmail } from "../../config/email";
 // land in tomorrow's UTC date and get reported a day late — after they already happened.
 const DIGEST_TIME_ZONE = "America/Toronto";
 
-function startOfDayInZone(date: Date, timeZone: string): Date {
+function zonedOffsetMs(utcMs: number, timeZone: string): number {
   const fmt = new Intl.DateTimeFormat("en-US", {
     timeZone,
     year: "numeric",
@@ -19,12 +19,32 @@ function startOfDayInZone(date: Date, timeZone: string): Date {
     second: "2-digit",
     hour12: false,
   });
-  const parts = Object.fromEntries(fmt.formatToParts(date).map((p) => [p.type, p.value]));
+  const parts = Object.fromEntries(fmt.formatToParts(new Date(utcMs)).map((p) => [p.type, p.value]));
   const hour = parts.hour === "24" ? 0 : Number(parts.hour);
-  const asUtcGuess = Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day), hour, Number(parts.minute), Number(parts.second));
-  const offsetMs = asUtcGuess - date.getTime();
-  const localMidnightUtcGuess = Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day), 0, 0, 0) - offsetMs;
-  return new Date(localMidnightUtcGuess);
+  const asUtc = Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day), hour, Number(parts.minute), Number(parts.second));
+  return asUtc - utcMs;
+}
+
+function startOfDayInZone(date: Date, timeZone: string): Date {
+  const dateFmt = new Intl.DateTimeFormat("en-US", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" });
+  const parts = Object.fromEntries(dateFmt.formatToParts(date).map((p) => [p.type, p.value]));
+  const y = Number(parts.year);
+  const m = Number(parts.month) - 1;
+  const d = Number(parts.day);
+
+  // First guess using the offset in effect at `date` itself (the cron's run time).
+  const offsetMs = zonedOffsetMs(date.getTime(), timeZone);
+  let guessUtcMs = Date.UTC(y, m, d, 0, 0, 0) - offsetMs;
+
+  // Refine using the offset actually in effect at the guessed midnight. This only matters on
+  // the two DST-transition days a year, where "now"'s offset (the cron runs at 9am ET) doesn't
+  // match the offset that was actually in effect at local midnight that morning -- without this,
+  // the digest window shifts an hour and can sweep in a visit from the night before.
+  const refinedOffsetMs = zonedOffsetMs(guessUtcMs, timeZone);
+  if (refinedOffsetMs !== offsetMs) {
+    guessUtcMs = Date.UTC(y, m, d, 0, 0, 0) - refinedOffsetMs;
+  }
+  return new Date(guessUtcMs);
 }
 
 export async function runVisitDigest() {

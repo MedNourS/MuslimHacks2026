@@ -8,15 +8,23 @@ import * as visitsService from "../src/endpoints/visits/visits.services";
 const PASSWORD = "Demo1234!";
 
 const DEMO_USERS = [
-  { name: "John Doe", email: "john.doe@example.com", phoneNumber: "+15145550101", accountType: "family" as const },
-  { name: "Jane Doe", email: "jane.doe@example.com", phoneNumber: "+15145550102", accountType: "family" as const },
-  { name: "Bob Ross", email: "bob.ross@example.com", phoneNumber: "+15145550103", accountType: "family" as const },
-  { name: "Alice Smith", email: "alice.smith@example.com", phoneNumber: "+15145550104", accountType: "family" as const },
+  { name: "John Doe", email: "john.doe@example.com", phoneNumber: "+15145550101" },
+  { name: "Jane Doe", email: "jane.doe@example.com", phoneNumber: "+15145550102" },
+  { name: "Bob Ross", email: "bob.ross@example.com", phoneNumber: "+15145550103" },
+  {
+    // Dual-role on purpose: Alice coordinates Margaret's circle AND volunteers for others —
+    // the two are independent, so this is the demo account for that combined dashboard view.
+    name: "Alice Smith",
+    email: "alice.smith@example.com",
+    phoneNumber: "+15145550104",
+    wantsToVolunteer: true as const,
+    preferredArea: "Verdun, Montreal",
+  },
   {
     name: "Yusuf Volunteer",
     email: "yusuf.volunteer@example.com",
     phoneNumber: "+15145550105",
-    accountType: "volunteer" as const,
+    wantsToVolunteer: true as const,
     preferredArea: "Verdun, Montreal",
   },
 ] as const;

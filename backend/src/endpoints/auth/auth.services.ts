@@ -1,10 +1,10 @@
 import type { z } from "zod";
-import { eq } from "drizzle-orm";
+import { and, eq, inArray, or } from "drizzle-orm";
 import { sign } from "hono/jwt";
 import { AppError } from "@mednours/backon";
 import { db } from "../../config/db";
-import { users } from "../../config/schema";
-import type { signupBodySchema, loginBodySchema } from "./auth.controller";
+import { users, visits } from "../../config/schema";
+import type { signupBodySchema, loginBodySchema, updateVolunteerBodySchema } from "./auth.controller";
 
 const password = (globalThis as unknown as {
   Bun: { password: { hash(password: string): Promise<string>; verify(password: string, hash: string): Promise<boolean> } };
@@ -31,7 +31,7 @@ function toPublicUser(user: {
   name: string;
   email: string;
   phoneNumber: string;
-  accountType: "family" | "volunteer";
+  wantsToVolunteer: boolean;
   preferredArea: string | null;
 }) {
   return {
@@ -39,19 +39,28 @@ function toPublicUser(user: {
     name: user.name,
     email: user.email,
     phoneNumber: user.phoneNumber,
-    accountType: user.accountType,
+    wantsToVolunteer: user.wantsToVolunteer,
     preferredArea: user.preferredArea,
   };
 }
 
 export async function signup(body: z.infer<typeof signupBodySchema>) {
-  const existing = await db.query.users.findFirst({ where: eq(users.email, body.email) });
+  const existing = await db.query.users.findFirst({
+    where: or(eq(users.email, body.email), eq(users.phoneNumber, body.phoneNumber)),
+  });
   if (existing) {
-    throw new AppError(409, "email_taken", "An account with this email already exists");
+    if (existing.email === body.email) {
+      throw new AppError(409, "email_taken", "An account with this email already exists");
+    }
+    throw new AppError(409, "phone_taken", "An account with this phone number already exists");
+  }
+
+  if (body.wantsToVolunteer && !body.preferredArea) {
+    throw new AppError(400, "validation_error", "Add an area you're willing to help in");
   }
 
   const passwordHash = await password.hash(body.password);
-  const accountType = body.accountType ?? "family";
+  const wantsToVolunteer = body.wantsToVolunteer ?? false;
 
   const [user] = await db
     .insert(users)
@@ -60,8 +69,8 @@ export async function signup(body: z.infer<typeof signupBodySchema>) {
       email: body.email,
       phoneNumber: body.phoneNumber,
       password: passwordHash,
-      accountType,
-      preferredArea: accountType === "volunteer" ? body.preferredArea : undefined,
+      wantsToVolunteer,
+      preferredArea: wantsToVolunteer ? body.preferredArea : undefined,
     })
     .returning();
 
@@ -82,4 +91,38 @@ export async function login(body: z.infer<typeof loginBodySchema>) {
 
   const token = await issueToken(user);
   return { token, user: toPublicUser(user) };
+}
+
+export async function updateVolunteer(userId: number, body: z.infer<typeof updateVolunteerBodySchema>) {
+  if (body.wantsToVolunteer && !body.preferredArea) {
+    throw new AppError(400, "validation_error", "Add an area you're willing to help in");
+  }
+
+  if (!body.wantsToVolunteer) {
+    // Turning volunteering off hides the "Volunteering" section (and its check-in/check-out
+    // controls) from the dashboard entirely, so a visit the user is still on the hook for
+    // would otherwise become invisible to them mid-commitment. Make them wrap it up first.
+    const activeVisit = await db.query.visits.findFirst({
+      where: and(eq(visits.visitorId, userId), inArray(visits.status, ["pending_family_confirm", "confirmed"])),
+    });
+    if (activeVisit) {
+      throw new AppError(
+        409,
+        "active_visits",
+        "Finish or cancel your active visit(s) before turning off volunteering"
+      );
+    }
+  }
+
+  const [user] = await db
+    .update(users)
+    .set({
+      wantsToVolunteer: body.wantsToVolunteer,
+      preferredArea: body.wantsToVolunteer ? body.preferredArea : null,
+    })
+    .where(eq(users.id, userId))
+    .returning();
+  if (!user) throw new AppError(404, "not_found", "User not found");
+
+  return toPublicUser(user);
 }

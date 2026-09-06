@@ -23,8 +23,8 @@ async function requireCoordinator(userId: number, elderId: string) {
 
 async function requireVolunteer(userId: number) {
   const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
-  if (!user || user.accountType !== "volunteer") {
-    throw new AppError(403, "forbidden", "Only volunteer accounts can do this");
+  if (!user || !user.wantsToVolunteer) {
+    throw new AppError(403, "forbidden", "Turn on volunteering in your account to do this");
   }
   return user;
 }

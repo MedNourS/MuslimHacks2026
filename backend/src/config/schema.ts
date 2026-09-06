@@ -1,6 +1,4 @@
-import { integer, uuid, pgTable, pgEnum, serial, text, timestamp, unique } from "drizzle-orm/pg-core";
-
-export const accountType = pgEnum("account_type", ["family", "volunteer"]);
+import { boolean, integer, uuid, pgTable, pgEnum, serial, text, timestamp, unique } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -8,8 +6,11 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   phoneNumber: text("phone_number").notNull().unique(),
   password: text("password").notNull(),
-  accountType: accountType("account_type").notNull().default("family"),
-  // Volunteers only — a coarse area they're willing to help in, e.g. "Verdun, Montreal".
+  // Opt-in, independent of having your own circle(s) — anyone can coordinate care for their
+  // own family AND volunteer for others at the same time.
+  wantsToVolunteer: boolean("wants_to_volunteer").notNull().default(false),
+  // Set only while wantsToVolunteer is true — a coarse area they're willing to help in, e.g.
+  // "Verdun, Montreal".
   preferredArea: text("preferred_area"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
